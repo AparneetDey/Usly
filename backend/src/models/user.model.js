@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema(
   {
@@ -19,6 +20,7 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: [true, 'Password hash is required'],
+      select: false,
     },
     avatar: {
       type: String,
@@ -30,6 +32,25 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+/**
+ * Static method to hash a plain text password using bcrypt
+ * @param {string} password - Plain text password
+ * @returns {Promise<string>} Hashed password string
+ */
+userSchema.statics.hashPassword = async function (password) {
+  const salt = await bcrypt.genSalt(10);
+  return await bcrypt.hash(password, salt);
+};
+
+/**
+ * Instance method to compare an entered plain text password with stored passwordHash
+ * @param {string} enteredPassword - Plain text password
+ * @returns {Promise<boolean>} Match result
+ */
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.passwordHash);
+};
 
 const User = mongoose.model('User', userSchema);
 
