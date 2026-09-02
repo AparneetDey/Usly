@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
@@ -54,9 +54,21 @@ const Complaints = () => {
     fetchComplaints();
   }, [statusFilter]);
 
-  const handleOpenDetail = (complaint) => {
+  const handleOpenDetail = async (complaint) => {
     setSelectedComplaint(complaint);
     setIsDetailOpen(true);
+
+    // If receiving partner opens a 'pending' complaint, update status to 'seen'
+    const isCreator = complaint.createdBy?._id === user?._id;
+    if (complaint.status === 'pending' && !isCreator) {
+      try {
+        const updated = await complaintService.updateComplaint(complaint._id, { status: 'seen' });
+        setSelectedComplaint(updated);
+        fetchComplaints();
+      } catch (err) {
+        console.error('Error updating complaint status to seen:', err);
+      }
+    }
   };
 
   const handleCreateComplaint = async (complaintData) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 import Modal from '../ui/Modal/Modal.jsx';
 import Badge from '../ui/Badge/Badge.jsx';
 import Button from '../ui/Button/Button.jsx';
@@ -13,6 +14,7 @@ const ComplaintDetailModal = ({
   onResolve,
   loading,
 }) => {
+  const { user, partner } = useAuth();
   const [responseMsg, setResponseMsg] = useState('');
 
   if (!complaint) return null;
@@ -34,6 +36,11 @@ const ComplaintDetailModal = ({
     });
   };
 
+  const creatorName =
+    complaint.createdBy?._id === user?._id
+      ? 'You'
+      : complaint.createdBy?.name || partner?.name || 'Partner';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={complaint.title} maxWidth="600px">
       <div className="flex flex-col gap-4">
@@ -47,7 +54,7 @@ const ComplaintDetailModal = ({
             {complaint.description}
           </p>
           <div className="mt-3 pt-2 border-t border-border/60 text-xs text-muted flex justify-between">
-            <span>Filed by {complaint.createdBy?.name || 'Partner'}</span>
+            <span>Filed by {creatorName}</span>
             <span>{formatDate(complaint.createdAt)}</span>
           </div>
         </div>
@@ -64,15 +71,22 @@ const ComplaintDetailModal = ({
               No responses yet. Write a defense or offer an apology! 😭
             </p>
           ) : (
-            complaint.responses.map((resp, idx) => (
-              <div key={resp._id || idx} className="p-3 bg-surface border border-border rounded-lg text-sm">
-                <div className="flex justify-between items-center text-xs font-semibold text-primary mb-1">
-                  <span>{resp.userId?.name || 'Partner'}</span>
-                  <span className="text-muted font-normal text-[11px]">{formatDate(resp.createdAt)}</span>
+            complaint.responses.map((resp, idx) => {
+              const responderName =
+                resp.userId?._id === user?._id
+                  ? 'You'
+                  : resp.userId?.name || partner?.name || 'Partner';
+
+              return (
+                <div key={resp._id || idx} className="p-3 bg-surface border border-border rounded-lg text-sm">
+                  <div className="flex justify-between items-center text-xs font-semibold text-primary mb-1">
+                    <span>{responderName}</span>
+                    <span className="text-muted font-normal text-[11px]">{formatDate(resp.createdAt)}</span>
+                  </div>
+                  <p className="text-text">{resp.message}</p>
                 </div>
-                <p className="text-text">{resp.message}</p>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 

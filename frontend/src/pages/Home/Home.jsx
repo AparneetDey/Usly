@@ -13,7 +13,7 @@ import complaintService from '../../services/complaint.service.js';
 import styles from './Home.module.css';
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, partner } = useAuth();
 
   const [nextEvent, setNextEvent] = useState(null);
   const [latestLetter, setLatestLetter] = useState(null);
@@ -71,13 +71,17 @@ const Home = () => {
         <h1 className={styles.greeting}>
           {getGreetingTime()}, {user?.name || 'Love'} ❤️
         </h1>
-        <p className={styles.subgreeting}>"Another day of us."</p>
+        <p className={styles.subgreeting}>
+          {partner ? `Sharing moments with ${partner.name}` : '"Another day of us."'}
+        </p>
       </div>
 
       <div className={styles.togetherBanner}>
         <div>
           <div className={styles.counterTitle}>Our Shared Journey</div>
-          <div className={styles.counterValue}>Usly space for two</div>
+          <div className={styles.counterValue}>
+            {user?.name || 'You'} & {partner?.name || 'Partner'}
+          </div>
         </div>
         <div className={styles.counterIcon}>💖</div>
       </div>
@@ -134,7 +138,7 @@ const Home = () => {
                 <div>
                   <h4 className="font-bold text-text text-base mb-1">{latestLetter.title}</h4>
                   <p className="text-xs text-muted mb-2">
-                    From {latestLetter.from?.name || 'Partner'} • {formatDate(latestLetter.createdAt)}
+                    From {latestLetter.from?.name || partner?.name || 'Partner'} • {formatDate(latestLetter.createdAt)}
                   </p>
                   {latestLetter.isLocked ? (
                     <p className="text-xs italic text-muted">
@@ -145,7 +149,7 @@ const Home = () => {
                   )}
                 </div>
               ) : (
-                <p className="text-muted text-sm">No letters received yet. Write one for your love! 💌</p>
+                <p className="text-muted text-sm">No letters received yet. Write one for {partner?.name || 'your love'}! 💌</p>
               )}
             </div>
             <div className="mt-4 pt-3 border-t border-border">

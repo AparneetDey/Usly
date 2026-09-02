@@ -1,9 +1,12 @@
 import React, { useEffect } from 'react';
 import { Lock, Heart } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 import Modal from '../ui/Modal/Modal.jsx';
 import Button from '../ui/Button/Button.jsx';
 
 const LetterDetailModal = ({ isOpen, onClose, letter, onOpenLetter }) => {
+  const { partner } = useAuth();
+
   useEffect(() => {
     if (isOpen && letter && !letter.isRead && !letter.isLocked && onOpenLetter) {
       onOpenLetter(letter._id);
@@ -22,6 +25,8 @@ const LetterDetailModal = ({ isOpen, onClose, letter, onOpenLetter }) => {
     });
   };
 
+  const senderName = letter.from?.name || partner?.name || 'Your Partner';
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={letter.title} maxWidth="560px">
       <div className="flex flex-col gap-4">
@@ -38,7 +43,7 @@ const LetterDetailModal = ({ isOpen, onClose, letter, onOpenLetter }) => {
         ) : (
           <div className="p-6 bg-gradient-to-b from-white to-background border border-border rounded-xl shadow-inner font-serif">
             <div className="flex justify-between items-center text-xs text-muted font-sans border-b border-border pb-3 mb-4">
-              <span>From: <strong>{letter.from?.name || 'Your Partner'}</strong></span>
+              <span>From: <strong>{senderName}</strong></span>
               <span>{formatDate(letter.createdAt)}</span>
             </div>
 

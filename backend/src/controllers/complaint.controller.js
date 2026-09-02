@@ -82,7 +82,7 @@ export const getComplaints = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get a single complaint by ID with embedded responses
+ * @desc    Get a single complaint by ID with embedded responses (auto-marks pending as seen when opened by recipient)
  * @route   GET /api/complaints/:id
  * @access  Private
  */
@@ -93,17 +93,27 @@ export const getComplaint = asyncHandler(async (req, res) => {
     throw new ApiError(400, 'Invalid Complaint ID format');
   }
 
-  const complaint = await Complaint.findById(id)
-    .populate('createdBy', 'name email avatar')
-    .populate('responses.userId', 'name email avatar')
-    .lean();
+  const complaint = await Complaint.findById(id);
 
   if (!complaint) {
     throw new ApiError(404, 'Complaint not found');
   }
 
+  const currentUserId = (req.user._id || req.user.id).toString();
+
+  // If viewed by the receiving partner and status is pending, mark as 'seen'
+  if (complaint.status === 'pending' && complaint.createdBy.toString() !== currentUserId) {
+    complaint.status = 'seen';
+    await complaint.save();
+  }
+
+  const populatedComplaint = await Complaint.findById(id)
+    .populate('createdBy', 'name email avatar')
+    .populate('responses.userId', 'name email avatar')
+    .lean();
+
   res.status(200).json(
-    new ApiResponse(200, complaint, 'Complaint retrieved successfully')
+    new ApiResponse(200, populatedComplaint, 'Complaint retrieved successfully')
   );
 });
 
@@ -154,7 +164,7 @@ export const updateComplaint = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Add an embedded response to a complaint
+ * @desc    Add an embedded response to a complaint (auto-transitions status to 'discussing')
  * @route   POST /api/complaints/:id/responses
  * @access  Private
  */
@@ -184,6 +194,11 @@ export const addResponse = asyncHandler(async (req, res) => {
     message: message.trim(),
     createdAt: new Date(),
   });
+
+  // Auto-transition status to 'discussing' when a response is added (unless already resolved)
+  if (complaint.status === 'pending' || complaint.status === 'seen') {
+    complaint.status = 'discussing';
+  }
 
   await complaint.save();
 

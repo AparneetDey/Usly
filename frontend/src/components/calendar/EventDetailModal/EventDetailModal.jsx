@@ -1,5 +1,6 @@
 import React from 'react';
 import { Calendar as CalendarIcon, Clock, Edit2, Trash2, RefreshCw } from 'lucide-react';
+import { useAuth } from '../../../context/AuthContext.jsx';
 import { getCategoryConfig } from '../categoryColors.js';
 import Modal from '../../ui/Modal/Modal.jsx';
 import Button from '../../ui/Button/Button.jsx';
@@ -12,6 +13,8 @@ const EventDetailModal = ({
   onEdit,
   onDelete,
 }) => {
+  const { user, partner } = useAuth();
+
   if (!event) return null;
 
   const config = getCategoryConfig(event.type);
@@ -25,6 +28,11 @@ const EventDetailModal = ({
       year: 'numeric',
     });
   };
+
+  const creatorName =
+    event.createdBy?._id === user?._id
+      ? 'You'
+      : event.createdBy?.name || partner?.name || 'Partner';
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Event Details" maxWidth="480px">
@@ -64,7 +72,7 @@ const EventDetailModal = ({
 
         <div className={styles.metaFooter}>
           <div className="flex items-center gap-2">
-            <span>Added by {event.createdBy?.name || 'Partner'}</span>
+            <span>Added by {creatorName}</span>
             {event.isRecurring && (
               <span className="flex items-center gap-1 text-primary text-xs font-semibold bg-border px-2 py-0.5 rounded-full">
                 <RefreshCw size={12} />

@@ -14,7 +14,7 @@ import authService from '../../services/auth.service.js';
 import styles from '../../components/letters/letters.module.css';
 
 const Letters = () => {
-  const { user } = useAuth();
+  const { user, partner: authPartner } = useAuth();
   const [activeTab, setActiveTab] = useState('received'); // 'received' | 'sent'
   const [receivedLetters, setReceivedLetters] = useState([]);
   const [sentLetters, setSentLetters] = useState([]);
@@ -26,27 +26,21 @@ const Letters = () => {
   const [isWriteOpen, setIsWriteOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const [partner, setPartner] = useState(null);
+  const [partner, setPartner] = useState(authPartner);
   const [toastMessage, setToastMessage] = useState('');
 
-  const fetchLetters = async () => {
+  const fetchLettersAndPartner = async () => {
     setLoading(true);
     try {
-      const [rec, snt] = await Promise.all([
+      const [rec, snt, partnerData] = await Promise.all([
         letterService.getReceivedLetters(),
         letterService.getSentLetters(),
+        authService.getPartnerDetails().catch(() => authPartner),
       ]);
       setReceivedLetters(rec || []);
       setSentLetters(snt || []);
-
-      // Infer partner ID from received or sent letters, or current user context
-      const sampleLetter = (rec || [])[0] || (snt || [])[0];
-      if (sampleLetter) {
-        const partnerInfo =
-          sampleLetter.from?._id === user?._id
-            ? sampleLetter.to
-            : sampleLetter.from;
-        if (partnerInfo) setPartner(partnerInfo);
+      if (partnerData) {
+        setPartner(partnerData);
       }
     } catch (err) {
       setToastMessage(err.message || 'Failed to fetch letters');
@@ -56,7 +50,7 @@ const Letters = () => {
   };
 
   useEffect(() => {
-    fetchLetters();
+    fetchLettersAndPartner();
   }, []);
 
   const handleOpenLetterDetail = (letter) => {
@@ -67,7 +61,7 @@ const Letters = () => {
   const handleMarkAsOpened = async (letterId) => {
     try {
       await letterService.openLetter(letterId);
-      fetchLetters();
+      fetchLettersAndPartner();
     } catch (err) {
       console.error('Error marking letter as opened:', err);
     }
@@ -79,7 +73,7 @@ const Letters = () => {
       await letterService.createLetter(letterData);
       setToastMessage('Letter sent successfully! 💌');
       setIsWriteOpen(false);
-      fetchLetters();
+      fetchLettersAndPartner();
     } catch (err) {
       setToastMessage(err.message || 'Failed to send letter');
     } finally {
@@ -92,7 +86,7 @@ const Letters = () => {
     try {
       await letterService.deleteLetter(letterId);
       setToastMessage('Letter deleted.');
-      fetchLetters();
+      fetchLettersAndPartner();
     } catch (err) {
       setToastMessage(err.message || 'Failed to delete letter');
     }
@@ -139,8 +133,8 @@ const Letters = () => {
           title={activeTab === 'received' ? 'No letters received yet' : 'No sent letters'}
           description={
             activeTab === 'received'
-              ? 'Maybe your partner is writing one right now?'
-              : 'Write a sweet note or schedule a Valentine letter for your love.'
+              ? `Maybe ${partner?.name || 'your partner'} is writing one right now?`
+              : `Write a sweet note or schedule a Valentine letter for ${partner?.name || 'your love'}.`
           }
           action={
             <Button variant="primary" size="sm" onClick={() => setIsWriteOpen(true)}>

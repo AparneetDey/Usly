@@ -1,8 +1,11 @@
 import React from 'react';
-import { Lock, Trash2, Calendar } from 'lucide-react';
+import { Lock, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 import styles from './letters.module.css';
 
 const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
+  const { partner } = useAuth();
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -11,6 +14,10 @@ const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
       year: 'numeric',
     });
   };
+
+  const recipientOrSenderName = isSent
+    ? letter.to?.name || partner?.name || 'Partner'
+    : letter.from?.name || partner?.name || 'Partner';
 
   return (
     <div
@@ -42,7 +49,7 @@ const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
 
       <div className={styles.footer}>
         <div>
-          <span>{isSent ? `To: ${letter.to?.name || 'Partner'}` : `From: ${letter.from?.name || 'Partner'}`}</span>
+          <span>{isSent ? `To: ${recipientOrSenderName}` : `From: ${recipientOrSenderName}`}</span>
           <span className="mx-1">•</span>
           <span>{formatDate(letter.createdAt)}</span>
         </div>

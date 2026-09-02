@@ -1,5 +1,6 @@
 import React from 'react';
-import { MessageCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import { MessageCircle, Trash2 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext.jsx';
 import Card from '../ui/Card/Card.jsx';
 import Badge from '../ui/Badge/Badge.jsx';
 import styles from './complaints.module.css';
@@ -15,6 +16,8 @@ const CATEGORY_EMOJIS = {
 };
 
 const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
+  const { user, partner } = useAuth();
+
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -24,6 +27,7 @@ const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
   };
 
   const isCreator = complaint.createdBy?._id === currentUserId;
+  const creatorName = isCreator ? 'You' : complaint.createdBy?.name || partner?.name || 'Partner';
 
   return (
     <Card hoverable className={styles.card} onClick={onClick}>
@@ -41,7 +45,7 @@ const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
 
       <div className={styles.footer}>
         <div className="flex items-center gap-3">
-          <span>By {complaint.createdBy?.name || 'Partner'}</span>
+          <span>By {creatorName}</span>
           <span>• {formatDate(complaint.createdAt)}</span>
         </div>
 
