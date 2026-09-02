@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 import healthRoutes from './routes/health.route.js';
+import imagekitRoutes from './routes/imagekit.route.js';
 import { notFoundHandler, errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
@@ -25,8 +26,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Health Check Endpoint: GET /api/health
+// API Routes
 app.use('/api/health', healthRoutes);
+app.use('/api/imagekit', imagekitRoutes);
 
 // Error Handling Middleware Foundation
 app.use(notFoundHandler);
