@@ -1,0 +1,25 @@
+{
+  "name": "usly",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/AparneetDey/Usly#readme",
+  "bugs": {
+    "url": "https://github.com/AparneetDey/Usly/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AparneetDey/Usly.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "frontend": "npm start --prefix frontend",
+    "backend": "npm run dev --prefix backend",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "dependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

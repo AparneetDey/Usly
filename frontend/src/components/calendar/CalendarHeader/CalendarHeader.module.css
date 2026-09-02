@@ -1,0 +1,91 @@
+.headerContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.leftControls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.monthYearTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.monthText {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.yearSelectWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.yearSelect {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.25rem 2rem 0.25rem 0.65rem;
+  height: 38px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: all 0.2s ease;
+}
+
+.yearSelect:hover, .yearSelect:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+.yearChevron {
+  position: absolute;
+  right: 0.6rem;
+  pointer-events: none;
+  color: var(--color-primary);
+}
+
+.navGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.2rem;
+  box-shadow: var(--shadow-subtle);
+}
+
+.rightControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.viewBadge {
+  height: 42px;
+  padding: 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}

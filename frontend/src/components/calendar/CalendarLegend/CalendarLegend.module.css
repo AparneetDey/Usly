@@ -1,0 +1,29 @@
+.legendContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+  font-size: 0.8rem;
+  box-shadow: var(--shadow-subtle);
+}
+
+.legendTitle {
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-right: 0.25rem;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}

@@ -1,0 +1,96 @@
+.dayCell {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  height: 105px;
+  max-height: 105px;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.dayCell:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.adjacentMonth {
+  background-color: #FAFAFD;
+  color: var(--color-text-secondary);
+  opacity: 0.55;
+}
+
+.selected {
+  border: 2px solid var(--color-primary) !important;
+  background-color: var(--color-surface-alt) !important;
+}
+
+.dayHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+
+.dayNumber {
+  font-size: 0.85rem;
+  font-weight: 700;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--color-text);
+}
+
+.todayNumber {
+  background-color: var(--color-primary);
+  color: var(--color-surface) !important;
+  font-weight: 800;
+}
+
+.eventsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.morePill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  padding: 0.1rem 0.35rem;
+  background-color: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.morePill:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-surface);
+}
+
+@media (max-width: 640px) {
+  .dayCell {
+    height: 75px;
+    max-height: 75px;
+    padding: 0.25rem;
+  }
+  .dayNumber {
+    font-size: 0.75rem;
+    width: 20px;
+    height: 20px;
+  }
+}

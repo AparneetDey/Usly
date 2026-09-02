@@ -1,0 +1,63 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  line-height: 1;
+}
+
+/* Event Types */
+.anniversary {
+  background-color: #FCE7F3;
+  color: #BE185D;
+}
+
+.birthday {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+
+.first_date {
+  background-color: #EDE9FE;
+  color: var(--color-primary);
+}
+
+.trip {
+  background-color: #E0F2FE;
+  color: #0369A1;
+}
+
+.special_day {
+  background-color: #F3E8FF;
+  color: #7E22CE;
+}
+
+.custom {
+  background-color: #F3F4F6;
+  color: #374151;
+}
+
+/* Complaint Statuses */
+.pending {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+
+.seen {
+  background-color: #E0F2FE;
+  color: #0369A1;
+}
+
+.discussing {
+  background-color: #EDE9FE;
+  color: var(--color-primary);
+}
+
+.resolved {
+  background-color: #DCFCE7;
+  color: #15803D;
+}
