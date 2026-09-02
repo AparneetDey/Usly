@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, Mail, AlertCircle, Image, ArrowRight } from 'lucide-react';
+import { Calendar as CalendarIcon, Mail, AlertCircle, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Card from '../../components/ui/Card/Card.jsx';
-import Button from '../../components/ui/Button/Button.jsx';
 import Badge from '../../components/ui/Badge/Badge.jsx';
 import Loader from '../../components/ui/Loader/Loader.jsx';
 import eventService from '../../services/event.service.js';
@@ -15,10 +14,38 @@ import styles from './Home.module.css';
 const Home = () => {
   const { user, partner } = useAuth();
 
+  const [greeting, setGreeting] = useState('');
+  const [greetingIcon, setGreetingIcon] = useState('❤️');
+
   const [nextEvent, setNextEvent] = useState(null);
   const [latestLetter, setLatestLetter] = useState(null);
   const [latestComplaint, setLatestComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Dynamic time-of-day greeting updater
+  useEffect(() => {
+    const updateGreeting = () => {
+      const hour = new Date().getHours();
+      if (hour >= 5 && hour < 12) {
+        setGreeting('Good morning');
+        setGreetingIcon('🌅');
+      } else if (hour >= 12 && hour < 17) {
+        setGreeting('Good afternoon');
+        setGreetingIcon('☀️');
+      } else if (hour >= 17 && hour < 22) {
+        setGreeting('Good evening');
+        setGreetingIcon('🌙');
+      } else {
+        setGreeting('Good night');
+        setGreetingIcon('🌌');
+      }
+    };
+
+    updateGreeting();
+    // Update dynamic time greeting every minute
+    const interval = setInterval(updateGreeting, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -49,13 +76,6 @@ const Home = () => {
     fetchData();
   }, []);
 
-  const getGreetingTime = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  };
-
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -69,7 +89,7 @@ const Home = () => {
     <PageContainer>
       <div className={styles.headerSection}>
         <h1 className={styles.greeting}>
-          {getGreetingTime()}, {user?.name || 'Love'} ❤️
+          {greeting}, {user?.name || 'Love'} {greetingIcon}
         </h1>
         <p className={styles.subgreeting}>
           {partner ? `Sharing moments with ${partner.name}` : '"Another day of us."'}
