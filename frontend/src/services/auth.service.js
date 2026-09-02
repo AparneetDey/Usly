@@ -14,6 +14,11 @@ export const authService = {
     return response.data;
   },
 
+  getPartnerDetails: async () => {
+    const response = await api.get('/auth/partner');
+    return response.data;
+  },
+
   logout: async () => {
     try {
       await api.post('/auth/logout');

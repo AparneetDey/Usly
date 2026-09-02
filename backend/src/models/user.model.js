@@ -27,6 +27,11 @@ const userSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
   {
     timestamps: true,

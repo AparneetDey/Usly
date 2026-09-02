@@ -4,6 +4,7 @@ import {
   login,
   logout,
   getCurrentUser,
+  getPartnerDetails,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
@@ -36,5 +37,12 @@ router.post('/logout', protect, logout);
  * @access  Private
  */
 router.get('/me', protect, getCurrentUser);
+
+/**
+ * @route   GET /api/auth/partner
+ * @desc    Get partner details for logged in user
+ * @access  Private
+ */
+router.get('/partner', protect, getPartnerDetails);
 
 export default router;

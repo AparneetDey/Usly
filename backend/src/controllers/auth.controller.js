@@ -24,7 +24,7 @@ export const register = asyncHandler(async (req, res) => {
     );
   }
 
-  const { name, email, password, avatar } = req.body;
+  const { name, email, password, avatar, partner } = req.body;
 
   if (!name || !email || !password) {
     throw new ApiError(400, 'Please provide name, email, and password');
@@ -44,6 +44,7 @@ export const register = asyncHandler(async (req, res) => {
     email: email.toLowerCase(),
     passwordHash,
     avatar: avatar || '',
+    partner: partner || null,
   });
 
   const token = generateToken(user._id);
@@ -53,6 +54,7 @@ export const register = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     avatar: user.avatar,
+    partner: user.partner,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -96,6 +98,7 @@ export const login = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     avatar: user.avatar,
+    partner: user.partner,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
@@ -137,7 +140,7 @@ export const logout = asyncHandler(async (req, res) => {
  */
 export const getCurrentUser = asyncHandler(async (req, res) => {
   const userId = req.user._id || req.user.id;
-  const user = await User.findById(userId).select('-passwordHash');
+  const user = await User.findById(userId).select('-passwordHash').populate('partner', 'name email avatar');
 
   if (!user) {
     throw new ApiError(404, 'User profile not found');
@@ -145,5 +148,36 @@ export const getCurrentUser = asyncHandler(async (req, res) => {
 
   res.status(200).json(
     new ApiResponse(200, user, 'Current user profile retrieved successfully')
+  );
+});
+
+/**
+ * @desc    Get partner details for the currently logged-in user
+ * @route   GET /api/auth/partner
+ * @access  Private
+ */
+export const getPartnerDetails = asyncHandler(async (req, res) => {
+  const userId = req.user._id || req.user.id;
+  const currentUser = await User.findById(userId);
+
+  if (!currentUser) {
+    throw new ApiError(404, 'User profile not found');
+  }
+
+  let partner = null;
+
+  if (currentUser.partner) {
+    partner = await User.findById(currentUser.partner).select('-passwordHash');
+  } else {
+    // In Usly (2-user private app), if partner field is not explicitly set, find the other user
+    partner = await User.findOne({ _id: { $ne: userId } }).select('-passwordHash');
+  }
+
+  if (!partner) {
+    throw new ApiError(404, 'Partner details not found');
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, partner, 'Partner details retrieved successfully')
   );
 });
