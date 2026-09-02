@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Letter from '../models/letter.model.js';
 import User from '../models/user.model.js';
+import notificationService from '../services/notification.service.js';
 import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js';
 
 /**
@@ -49,6 +50,11 @@ export const createLetter = asyncHandler(async (req, res) => {
     'from to',
     'name email avatar'
   );
+
+  // Trigger non-blocking email notification for delivered letters
+  notificationService.notifyNewLetter(populatedLetter).catch((err) => {
+    console.error('[createLetter] Background notification error:', err.message);
+  });
 
   res.status(201).json(
     new ApiResponse(201, populatedLetter, 'Letter created successfully')

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Complaint from '../models/complaint.model.js';
+import notificationService from '../services/notification.service.js';
 import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js';
 
 const ALLOWED_CATEGORIES = [
@@ -48,6 +49,11 @@ export const createComplaint = asyncHandler(async (req, res) => {
     'createdBy',
     'name email avatar'
   );
+
+  // Trigger non-blocking email notification to the recipient partner
+  notificationService.notifyNewComplaint(populatedComplaint).catch((err) => {
+    console.error('[createComplaint] Background notification error:', err.message);
+  });
 
   res.status(201).json(
     new ApiResponse(201, populatedComplaint, 'Complaint submitted successfully')
