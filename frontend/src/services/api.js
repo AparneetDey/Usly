@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -10,7 +10,7 @@ const api = axios.create({
   },
 });
 
-// Request Interceptor: Attach JWT token from localStorage if present
+// Request Interceptor: Automatically attach Bearer token from localStorage
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,16 +22,22 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Format standard API responses and handle unauthorized errors
+// Response Interceptor: Extract response data and handle 401 unauthorized errors
 api.interceptors.response.use(
   (response) => {
     return response.data;
   },
   (error) => {
+    if (error.response?.status === 401) {
+      // Remove invalid/expired token from localStorage
+      localStorage.removeItem('token');
+    }
+
     const message =
       error.response?.data?.message ||
       error.message ||
-      'Something went wrong. Please try again. 💜';
+      'Session expired or unauthorized. Please log in again. 💜';
+
     return Promise.reject(new Error(message));
   }
 );

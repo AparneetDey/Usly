@@ -6,6 +6,7 @@ import Loader from '../components/ui/Loader/Loader.jsx';
 const ProtectedRoute = () => {
   const { isAuthenticated, loading } = useAuth();
 
+  // Wait for initial session restoration before deciding route navigation
   if (loading) {
     return <Loader fullScreen message="Unlocking your romantic space... 💜" />;
   }

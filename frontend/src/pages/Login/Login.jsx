@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
 import Input from '../../components/ui/Input/Input.jsx';
+import Loader from '../../components/ui/Loader/Loader.jsx';
 import styles from './Login.module.css';
 
 const Login = () => {
@@ -11,8 +12,19 @@ const Login = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect to home page without showing login form
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [loading, isAuthenticated, navigate]);
+
+  if (loading) {
+    return <Loader fullScreen message="Unlocking your romantic space... 💜" />;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();

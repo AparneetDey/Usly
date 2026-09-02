@@ -17,14 +17,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  /**
+   * Restores user session on initial app mount by validating stored JWT via GET /api/auth/me
+   */
   const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      setUser(null);
+      setPartner(null);
+      setLoading(false);
+      return;
+    }
+
     try {
       const userData = await authService.getCurrentUser();
       setUser(userData);
-
-      // Fetch partner details
       await fetchPartner();
     } catch {
+      // Token is invalid or expired
+      localStorage.removeItem('token');
       setUser(null);
       setPartner(null);
     } finally {
@@ -38,15 +50,20 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const data = await authService.login(email, password);
-    setUser(data.user);
+    const loggedInUser = data.user || data;
+    setUser(loggedInUser);
     await fetchPartner();
-    return data.user;
+    return loggedInUser;
   };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    setPartner(null);
+    try {
+      await authService.logout();
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+      setPartner(null);
+    }
   };
 
   return (
