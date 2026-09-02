@@ -32,12 +32,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // API Routes Registration
-app.use('/api/health', healthRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/letters', letterRoutes);
-app.use('/api/complaints', complaintRoutes);
-app.use('/api/imagekit', imagekitRoutes);
+app.use('/api/v1/health', healthRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/events', eventRoutes);
+app.use('/api/v1/letters', letterRoutes);
+app.use('/api/v1/complaints', complaintRoutes);
+app.use('/api/v1/imagekit', imagekitRoutes);
 
 // Error Handling Middleware Foundation
 app.use(notFoundHandler);

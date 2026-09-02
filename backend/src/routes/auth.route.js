@@ -2,6 +2,7 @@ import express from 'express';
 import {
   register,
   login,
+  logout,
   getCurrentUser,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
@@ -17,10 +18,17 @@ router.post('/register', register);
 
 /**
  * @route   POST /api/auth/login
- * @desc    Authenticate user & get token
+ * @desc    Authenticate user, set HTTP-only cookie & get token
  * @access  Public
  */
 router.post('/login', login);
+
+/**
+ * @route   POST /api/auth/logout
+ * @desc    Logout user & clear auth cookie
+ * @access  Private
+ */
+router.post('/logout', protect, logout);
 
 /**
  * @route   GET /api/auth/me

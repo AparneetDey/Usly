@@ -1,6 +1,14 @@
 import User from '../models/user.model.js';
 import { ApiError, ApiResponse, asyncHandler, generateToken } from '../utils/index.js';
 
+// Secure Cookie Options for JWT authentication
+const cookieOptions = {
+  httpOnly: true, // Mitigates XSS by preventing client JS access
+  secure: process.env.NODE_ENV === 'production', // Send over HTTPS only in production
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+};
+
 /**
  * @desc    Register a new user (Max 2 users allowed)
  * @route   POST /api/auth/register
@@ -49,6 +57,9 @@ export const register = asyncHandler(async (req, res) => {
     updatedAt: user.updatedAt,
   };
 
+  // Set HTTP-only cookie
+  res.cookie('token', token, cookieOptions);
+
   res.status(201).json(
     new ApiResponse(
       201,
@@ -59,7 +70,7 @@ export const register = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Authenticate user & get token
+ * @desc    Authenticate user, set cookie & get token
  * @route   POST /api/auth/login
  * @access  Public
  */
@@ -89,12 +100,33 @@ export const login = asyncHandler(async (req, res) => {
     updatedAt: user.updatedAt,
   };
 
+  // Set HTTP-only cookie
+  res.cookie('token', token, cookieOptions);
+
   res.status(200).json(
     new ApiResponse(
       200,
       { user: safeUserData, token },
       'Login successful'
     )
+  );
+});
+
+/**
+ * @desc    Logout user & clear auth cookie
+ * @route   POST /api/auth/logout
+ * @access  Private
+ */
+export const logout = asyncHandler(async (req, res) => {
+  res.cookie('token', '', {
+    httpOnly: true,
+    expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  });
+
+  res.status(200).json(
+    new ApiResponse(200, null, 'Logged out successfully')
   );
 });
 
