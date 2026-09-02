@@ -31,8 +31,7 @@ const Navbar = () => {
     <header className={styles.navbar}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
-          <span className={styles.brandIcon}>❤️</span>
-          <span>Usly</span>
+          <img src="/usly-logo.png" alt="Usly Logo" className={styles.logoImg} />
         </Link>
 
         <nav>
