@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Calendar as CalendarIcon, Clock, ChevronRight } from 'lucide-react';
+import {
+  PlusIcon,
+  CalendarIcon,
+  ClockIcon,
+  ChevronRightIcon,
+} from '../../components/icons/index.js';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Card from '../../components/ui/Card/Card.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
@@ -13,7 +18,7 @@ import CalendarLegend from '../../components/calendar/CalendarLegend/CalendarLeg
 import EventModal from '../../components/calendar/EventModal.jsx';
 import EventDetailModal from '../../components/calendar/EventDetailModal/EventDetailModal.jsx';
 
-import { getDaysForMonthGrid, formatCalendarDate, isToday, isSameDay } from '../../components/calendar/dateUtils.js';
+import { getDaysForMonthGrid, formatCalendarDate, isToday } from '../../components/calendar/dateUtils.js';
 import { getCategoryConfig } from '../../components/calendar/categoryColors.js';
 import eventService from '../../services/event.service.js';
 
@@ -42,11 +47,10 @@ const Calendar = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      // Fetch events for current viewed year
       const data = await eventService.getEvents({ year: currentYear });
       setEvents(data || []);
     } catch (err) {
-      setToastMessage(err.message || 'Couldn\'t load your calendar. Please try again. 💜');
+      setToastMessage(err.message || 'Couldn\'t load your calendar. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -119,10 +123,10 @@ const Calendar = () => {
     try {
       if (eventToEdit && eventToEdit._id) {
         await eventService.updateEvent(eventToEdit._id, eventData);
-        setToastMessage('Memory updated successfully! ❤️');
+        setToastMessage('Memory updated successfully!');
       } else {
         await eventService.createEvent(eventData);
-        setToastMessage('Special day added to calendar! ✨');
+        setToastMessage('Special day added to calendar!');
       }
       setIsAddEditOpen(false);
       fetchEvents();
@@ -149,10 +153,8 @@ const Calendar = () => {
     }
   };
 
-  // Calculate calendar grid days
   const gridDays = getDaysForMonthGrid(currentYear, currentMonth);
 
-  // Calculate upcoming events (future events sorted by date)
   const now = new Date();
   const upcomingEvents = events
     .filter((e) => new Date(e.date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
@@ -188,7 +190,7 @@ const Calendar = () => {
         <Loader message="Loading your romantic calendar..." />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main 7-Column Calendar Grid (3 Columns on Large Screens) */}
+          {/* Main 7-Column Calendar Grid */}
           <div className="lg:col-span-3 flex flex-col gap-4">
             <CalendarGrid
               days={gridDays}
@@ -218,7 +220,7 @@ const Calendar = () => {
                   size="sm"
                   onClick={() => handleOpenAddModal(selectedDay.dateString)}
                 >
-                  <Plus size={14} />
+                  <PlusIcon size={14} />
                   <span>Add Event to Date</span>
                 </Button>
               </Card>
@@ -238,7 +240,7 @@ const Calendar = () => {
 
               {upcomingEvents.length === 0 ? (
                 <div className="py-6 text-center text-xs text-muted italic">
-                  Nothing special planned yet. Maybe add something? 💜
+                  Nothing special planned yet. Maybe add something?
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5">
@@ -266,7 +268,7 @@ const Calendar = () => {
                             </span>
                           </div>
                         </div>
-                        <ChevronRight size={14} className="opacity-60 shrink-0" />
+                        <ChevronRightIcon size={14} className="opacity-60 shrink-0" />
                       </div>
                     );
                   })}

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { Send, CheckCircle2, MessageSquare } from 'lucide-react';
+import {
+  SendIcon,
+  CheckIcon,
+  MessageCircleIcon,
+} from '../icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Modal from '../ui/Modal/Modal.jsx';
 import Badge from '../ui/Badge/Badge.jsx';
@@ -62,13 +66,13 @@ const ComplaintDetailModal = ({
         {/* Responses Thread */}
         <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-1">
           <h4 className="text-xs font-bold text-muted uppercase tracking-wider flex items-center gap-1">
-            <MessageSquare size={14} />
+            <MessageCircleIcon size={14} />
             <span>Discussion Thread ({complaint.responses?.length || 0})</span>
           </h4>
 
           {(!complaint.responses || complaint.responses.length === 0) ? (
             <p className="text-xs text-muted italic text-center py-4 bg-surface rounded-lg border border-dashed border-border">
-              No responses yet. Write a defense or offer an apology! 😭
+              No responses yet. Write a defense or offer an apology!
             </p>
           ) : (
             complaint.responses.map((resp, idx) => {
@@ -100,7 +104,7 @@ const ComplaintDetailModal = ({
               className="flex-1"
             />
             <Button type="submit" variant="primary" loading={loading} disabled={!responseMsg.trim()}>
-              <Send size={16} />
+              <SendIcon size={16} />
             </Button>
           </form>
         )}
@@ -109,12 +113,12 @@ const ComplaintDetailModal = ({
         <div className="flex justify-between items-center pt-2">
           {complaint.status !== 'resolved' ? (
             <Button variant="accent" size="sm" onClick={() => onResolve(complaint._id)}>
-              <CheckCircle2 size={16} />
+              <CheckIcon size={16} />
               <span>Mark as Resolved</span>
             </Button>
           ) : (
             <span className="text-xs font-semibold text-green-600 flex items-center gap-1">
-              <CheckCircle2 size={14} />
+              <CheckIcon size={14} />
               <span>Resolved on {formatDate(complaint.resolvedAt)}</span>
             </span>
           )}

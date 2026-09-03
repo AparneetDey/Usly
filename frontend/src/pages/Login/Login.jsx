@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { HeartIcon, WarningIcon } from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
 import Input from '../../components/ui/Input/Input.jsx';
@@ -15,7 +16,6 @@ const Login = () => {
   const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // If already authenticated, redirect to home page without showing login form
   useEffect(() => {
     if (!loading && isAuthenticated) {
       navigate('/', { replace: true });
@@ -23,7 +23,7 @@ const Login = () => {
   }, [loading, isAuthenticated, navigate]);
 
   if (loading) {
-    return <Loader fullScreen message="Unlocking your romantic space... 💜" />;
+    return <Loader fullScreen message="Unlocking your romantic space..." />;
   }
 
   const handleSubmit = async (e) => {
@@ -40,7 +40,7 @@ const Login = () => {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Invalid credentials. Please try again 💜');
+      setError(err.message || 'Invalid credentials. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -49,13 +49,15 @@ const Login = () => {
   return (
     <div className={styles.page}>
       <div className={styles.box}>
-        <div className={styles.logo}>❤️</div>
+        <div className={styles.logo}>
+          <img src="/usly-logo.png" alt="Usly Logo" className="h-12 w-auto mx-auto mb-2" />
+        </div>
         <h1 className={styles.title}>Usly</h1>
         <p className={styles.subtitle}>Welcome back to our private corner</p>
 
         {error && (
           <div className={styles.alert}>
-            <span>⚠️</span>
+            <WarningIcon size={18} className="text-highlight shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -80,7 +82,8 @@ const Login = () => {
           />
 
           <Button type="submit" variant="primary" fullWidth loading={submitting}>
-            Log In 💖
+            <span>Log In</span>
+            <HeartIcon size={16} filled className="ml-1" />
           </Button>
         </form>
 

@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+import { ComplaintIcon, PlusIcon } from '../icons/index.js';
 import Modal from '../ui/Modal/Modal.jsx';
 import Input from '../ui/Input/Input.jsx';
 import Select from '../ui/Select/Select.jsx';
 import Button from '../ui/Button/Button.jsx';
 
 const CATEGORIES = [
-  { value: 'food', label: '🍟 Stealing Food' },
-  { value: 'late', label: '⏰ Running Late' },
-  { value: 'ignored', label: '🙈 Ignored Messages' },
-  { value: 'annoying', label: '😜 Mildly Annoying' },
-  { value: 'serious', label: '🥺 Serious Concern' },
-  { value: 'funny', label: '😂 Funny Complaint' },
-  { value: 'other', label: '📌 Other' },
+  { value: 'food', label: 'Stealing Food' },
+  { value: 'late', label: 'Running Late' },
+  { value: 'ignored', label: 'Ignored Messages' },
+  { value: 'annoying', label: 'Mildly Annoying' },
+  { value: 'serious', label: 'Serious Concern' },
+  { value: 'funny', label: 'Funny Complaint' },
+  { value: 'other', label: 'Other' },
 ];
 
 const CreateComplaintModal = ({ isOpen, onClose, onCreate, loading }) => {
@@ -29,7 +30,7 @@ const CreateComplaintModal = ({ isOpen, onClose, onCreate, loading }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="File a Complaint 😭" maxWidth="520px">
+    <Modal isOpen={isOpen} onClose={onClose} title="File a Complaint" maxWidth="520px">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <Input
           label="Complaint Title"
@@ -61,7 +62,8 @@ const CreateComplaintModal = ({ isOpen, onClose, onCreate, loading }) => {
             Cancel
           </Button>
           <Button type="submit" variant="primary" loading={loading}>
-            File Complaint 😭
+            <PlusIcon size={16} />
+            <span>File Complaint</span>
           </Button>
         </div>
       </form>

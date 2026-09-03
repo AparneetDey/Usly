@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar as CalendarIcon, Mail, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  CalendarIcon,
+  MailIcon,
+  ComplaintIcon,
+  ImageIcon,
+  HeartIcon,
+  LockIcon,
+  ArrowRightIcon,
+  SunIcon,
+  MoonIcon,
+  MessageCircleIcon,
+} from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Card from '../../components/ui/Card/Card.jsx';
@@ -15,7 +26,7 @@ const Home = () => {
   const { user, partner } = useAuth();
 
   const [greeting, setGreeting] = useState('');
-  const [greetingIcon, setGreetingIcon] = useState('❤️');
+  const [GreetingIconComp, setGreetingIconComp] = useState(() => SunIcon);
 
   const [nextEvent, setNextEvent] = useState(null);
   const [latestLetter, setLatestLetter] = useState(null);
@@ -28,21 +39,20 @@ const Home = () => {
       const hour = new Date().getHours();
       if (hour >= 5 && hour < 12) {
         setGreeting('Good morning');
-        setGreetingIcon('🌅');
+        setGreetingIconComp(() => SunIcon);
       } else if (hour >= 12 && hour < 17) {
         setGreeting('Good afternoon');
-        setGreetingIcon('☀️');
+        setGreetingIconComp(() => SunIcon);
       } else if (hour >= 17 && hour < 22) {
         setGreeting('Good evening');
-        setGreetingIcon('🌙');
+        setGreetingIconComp(() => MoonIcon);
       } else {
         setGreeting('Good night');
-        setGreetingIcon('🌌');
+        setGreetingIconComp(() => MoonIcon);
       }
     };
 
     updateGreeting();
-    // Update dynamic time greeting every minute
     const interval = setInterval(updateGreeting, 60000);
     return () => clearInterval(interval);
   }, []);
@@ -56,15 +66,11 @@ const Home = () => {
           complaintService.getComplaints().catch(() => []),
         ]);
 
-        // Find next upcoming event
         const now = new Date();
         const upcoming = (eventsData || []).find((e) => new Date(e.date) >= now);
         setNextEvent(upcoming || eventsData[0] || null);
 
-        // Find latest letter
         setLatestLetter((lettersData || [])[0] || null);
-
-        // Find latest complaint
         setLatestComplaint((complaintsData || [])[0] || null);
       } catch (err) {
         console.error('Error fetching home summary:', err);
@@ -89,7 +95,8 @@ const Home = () => {
     <PageContainer>
       <div className={styles.headerSection}>
         <h1 className={styles.greeting}>
-          {greeting}, {user?.name || 'Love'} {greetingIcon}
+          <span>{greeting}, {user?.name || 'Love'}</span>
+          <GreetingIconComp size={24} className="text-accent ml-2 inline-block" />
         </h1>
         <p className={styles.subgreeting}>
           {partner ? `Sharing moments with ${partner.name}` : '"Another day of us."'}
@@ -103,7 +110,9 @@ const Home = () => {
             {user?.name || 'You'} & {partner?.name || 'Partner'}
           </div>
         </div>
-        <div className={styles.counterIcon}>💖</div>
+        <div className={styles.counterIcon}>
+          <HeartIcon size={32} filled className="text-accent" />
+        </div>
       </div>
 
       {loading ? (
@@ -135,7 +144,7 @@ const Home = () => {
             <div className="mt-4 pt-3 border-t border-border">
               <Link to="/calendar" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
                 <span>View Calendar</span>
-                <ArrowRight size={12} />
+                <ArrowRightIcon size={12} />
               </Link>
             </div>
           </Card>
@@ -144,12 +153,13 @@ const Home = () => {
           <Card hoverable className={styles.summaryCard}>
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
-                <Mail size={18} className="text-primary" />
+                <MailIcon size={18} className="text-primary" />
                 <span>Latest Letter</span>
               </div>
               {latestLetter?.isLocked && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-primary">
-                  🔒 Locked
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-primary flex items-center gap-1">
+                  <LockIcon size={12} />
+                  <span>Locked</span>
                 </span>
               )}
             </div>
@@ -169,13 +179,13 @@ const Home = () => {
                   )}
                 </div>
               ) : (
-                <p className="text-muted text-sm">No letters received yet. Write one for {partner?.name || 'your love'}! 💌</p>
+                <p className="text-muted text-sm">No letters received yet. Write one for {partner?.name || 'your love'}!</p>
               )}
             </div>
             <div className="mt-4 pt-3 border-t border-border">
               <Link to="/letters" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
                 <span>Open Letters</span>
-                <ArrowRight size={12} />
+                <ArrowRightIcon size={12} />
               </Link>
             </div>
           </Card>
@@ -184,7 +194,7 @@ const Home = () => {
           <Card hoverable className={styles.summaryCard}>
             <div className={styles.cardHeader}>
               <div className={styles.cardTitle}>
-                <AlertCircle size={18} className="text-primary" />
+                <ComplaintIcon size={18} className="text-primary" />
                 <span>Complaint Box</span>
               </div>
               {latestComplaint && (
@@ -197,19 +207,20 @@ const Home = () => {
                   <h4 className="font-bold text-text text-base mb-1">{latestComplaint.title}</h4>
                   <p className="text-xs text-muted mb-2 line-clamp-2">{latestComplaint.description}</p>
                   {latestComplaint.responses?.length > 0 && (
-                    <span className="text-xs text-primary font-semibold">
-                      💬 {latestComplaint.responses.length} response(s)
+                    <span className="text-xs text-primary font-semibold flex items-center gap-1">
+                      <MessageCircleIcon size={14} />
+                      <span>{latestComplaint.responses.length} response(s)</span>
                     </span>
                   )}
                 </div>
               ) : (
-                <p className="text-muted text-sm">All good! No active complaints at the moment. 😇</p>
+                <p className="text-muted text-sm">All good! No active complaints at the moment.</p>
               )}
             </div>
             <div className="mt-4 pt-3 border-t border-border">
               <Link to="/complaints" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
                 <span>Open Complaint Box</span>
-                <ArrowRight size={12} />
+                <ArrowRightIcon size={12} />
               </Link>
             </div>
           </Card>
@@ -221,22 +232,30 @@ const Home = () => {
         <h3 className={styles.sectionTitle}>Quick Actions</h3>
         <div className={styles.actionGrid}>
           <Link to="/calendar" className={styles.actionCard}>
-            <span className={styles.actionIcon}>📅</span>
+            <span className={styles.actionIcon}>
+              <CalendarIcon size={24} className="text-primary" />
+            </span>
             <span className={styles.actionLabel}>Calendar</span>
           </Link>
 
           <Link to="/letters" className={styles.actionCard}>
-            <span className={styles.actionIcon}>💌</span>
+            <span className={styles.actionIcon}>
+              <MailIcon size={24} className="text-primary" />
+            </span>
             <span className={styles.actionLabel}>Write a Letter</span>
           </Link>
 
           <Link to="/complaints" className={styles.actionCard}>
-            <span className={styles.actionIcon}>😭</span>
+            <span className={styles.actionIcon}>
+              <ComplaintIcon size={24} className="text-primary" />
+            </span>
             <span className={styles.actionLabel}>Complaint Box</span>
           </Link>
 
           <div className={`${styles.actionCard} opacity-60 cursor-not-allowed`}>
-            <span className={styles.actionIcon}>📸</span>
+            <span className={styles.actionIcon}>
+              <ImageIcon size={24} className="text-primary" />
+            </span>
             <span className={styles.actionLabel}>Memories (Soon)</span>
           </div>
         </div>

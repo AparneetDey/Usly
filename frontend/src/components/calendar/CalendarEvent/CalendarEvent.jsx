@@ -4,6 +4,7 @@ import styles from './CalendarEvent.module.css';
 
 const CalendarEvent = ({ event, onClick }) => {
   const config = getCategoryConfig(event.type);
+  const IconComp = config.iconComponent;
 
   return (
     <div
@@ -17,9 +18,9 @@ const CalendarEvent = ({ event, onClick }) => {
         e.stopPropagation();
         onClick(event);
       }}
-      title={`${config.emoji} ${event.title} ${event.startTime ? `(${event.startTime})` : ''}`}
+      title={`${config.label}: ${event.title} ${event.startTime ? `(${event.startTime})` : ''}`}
     >
-      <span className={styles.emoji}>{config.emoji}</span>
+      <IconComp size={12} color="currentColor" className="shrink-0" />
       <span className={styles.title}>{event.title}</span>
       {event.startTime && <span className={styles.time}>{event.startTime}</span>}
     </div>

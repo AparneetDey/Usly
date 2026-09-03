@@ -8,20 +8,23 @@ const CalendarLegend = () => {
   return (
     <div className={styles.legendContainer}>
       <span className={styles.legendTitle}>Legend:</span>
-      {categories.map((cat) => (
-        <span
-          key={cat.key}
-          className={styles.legendItem}
-          style={{
-            backgroundColor: cat.bg,
-            borderColor: cat.border,
-            color: cat.text,
-          }}
-        >
-          <span>{cat.emoji}</span>
-          <span>{cat.label}</span>
-        </span>
-      ))}
+      {categories.map((cat) => {
+        const IconComp = cat.iconComponent;
+        return (
+          <span
+            key={cat.key}
+            className={styles.legendItem}
+            style={{
+              backgroundColor: cat.bg,
+              borderColor: cat.border,
+              color: cat.text,
+            }}
+          >
+            <IconComp size={14} color="currentColor" />
+            <span>{cat.label}</span>
+          </span>
+        );
+      })}
     </div>
   );
 };

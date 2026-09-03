@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import {
+  PlusIcon,
+  ComplaintIcon,
+  CheckIcon,
+} from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
@@ -58,7 +62,6 @@ const Complaints = () => {
     setSelectedComplaint(complaint);
     setIsDetailOpen(true);
 
-    // If receiving partner opens a 'pending' complaint, update status to 'seen'
     const isCreator = complaint.createdBy?._id === user?._id;
     if (complaint.status === 'pending' && !isCreator) {
       try {
@@ -75,7 +78,7 @@ const Complaints = () => {
     setSubmitting(true);
     try {
       await complaintService.createComplaint(complaintData);
-      setToastMessage('Complaint filed successfully! 😭');
+      setToastMessage('Complaint filed successfully!');
       setIsCreateOpen(false);
       fetchComplaints();
     } catch (err) {
@@ -103,7 +106,7 @@ const Complaints = () => {
     try {
       const updated = await complaintService.resolveComplaint(complaintId);
       setSelectedComplaint(updated);
-      setToastMessage('Complaint marked as resolved! 🎉');
+      setToastMessage('Complaint marked as resolved!');
       fetchComplaints();
     } catch (err) {
       setToastMessage(err.message || 'Failed to resolve complaint');
@@ -128,11 +131,11 @@ const Complaints = () => {
     <PageContainer>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Complaint Box 😭</h1>
+          <h1 className={styles.title}>Complaint Box</h1>
           <p className={styles.subtitle}>Got something to complain about? File a playful ticket!</p>
         </div>
         <Button variant="primary" onClick={() => setIsCreateOpen(true)}>
-          <Plus size={18} />
+          <PlusIcon size={18} />
           <span>File a Complaint</span>
         </Button>
       </div>
@@ -153,7 +156,7 @@ const Complaints = () => {
         <Loader message="Fetching complaint box..." />
       ) : complaints.length === 0 ? (
         <EmptyState
-          icon="😇"
+          icon={<ComplaintIcon size={40} className="text-primary" />}
           title="No complaints found"
           description={
             statusFilter === 'all'
@@ -162,7 +165,7 @@ const Complaints = () => {
           }
           action={
             <Button variant="primary" size="sm" onClick={() => setIsCreateOpen(true)}>
-              <Plus size={16} />
+              <PlusIcon size={16} />
               <span>File Complaint</span>
             </Button>
           }

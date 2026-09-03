@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Lock, Heart } from 'lucide-react';
+import { LockIcon, HeartIcon } from '../icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Modal from '../ui/Modal/Modal.jsx';
 import Button from '../ui/Button/Button.jsx';
@@ -33,9 +33,9 @@ const LetterDetailModal = ({ isOpen, onClose, letter, onOpenLetter }) => {
         {letter.isLocked ? (
           <div className="p-6 bg-border/40 rounded-xl text-center flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-accent/30 flex items-center justify-center text-primary">
-              <Lock size={24} />
+              <LockIcon size={24} />
             </div>
-            <h4 className="font-bold text-text text-base">This letter is currently locked 🔒</h4>
+            <h4 className="font-bold text-text text-base">This letter is currently locked</h4>
             <p className="text-sm text-muted max-w-sm">
               {letter.message || `Scheduled to open on ${formatDate(letter.scheduledFor)}`}
             </p>
@@ -53,7 +53,7 @@ const LetterDetailModal = ({ isOpen, onClose, letter, onOpenLetter }) => {
 
             <div className="flex items-center justify-end gap-1 text-primary text-xs font-sans font-semibold pt-3 border-t border-border/60">
               <span>Forever yours</span>
-              <Heart size={12} className="fill-primary" />
+              <HeartIcon size={14} filled className="text-primary" />
             </div>
           </div>
         )}

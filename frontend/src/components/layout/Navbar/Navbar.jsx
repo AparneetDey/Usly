@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Heart, Calendar, Mail, AlertCircle, Image, LogOut, Menu, X } from 'lucide-react';
+import {
+  HomeIcon,
+  CalendarIcon,
+  MailIcon,
+  ComplaintIcon,
+  ImageIcon,
+  LogOutIcon,
+  MenuIcon,
+  CloseIcon,
+} from '../../icons/index.js';
 import { useAuth } from '../../../context/AuthContext.jsx';
 import Button from '../../ui/Button/Button.jsx';
 import styles from './Navbar.module.css';
@@ -16,11 +25,11 @@ const Navbar = () => {
   };
 
   const navItems = [
-    { label: 'Home', path: '/', icon: Heart },
-    { label: 'Calendar', path: '/calendar', icon: Calendar },
-    { label: 'Letters', path: '/letters', icon: Mail },
-    { label: 'Complaints', path: '/complaints', icon: AlertCircle },
-    { label: 'Memories', path: '#', icon: Image, badge: 'Soon' },
+    { label: 'Home', path: '/', icon: HomeIcon },
+    { label: 'Calendar', path: '/calendar', icon: CalendarIcon },
+    { label: 'Letters', path: '/letters', icon: MailIcon },
+    { label: 'Complaints', path: '/complaints', icon: ComplaintIcon },
+    { label: 'Memories', path: '#', icon: ImageIcon, badge: 'Soon' },
   ];
 
   const getInitials = (name) => {
@@ -37,12 +46,12 @@ const Navbar = () => {
         <nav>
           <ul className={styles.navLinks}>
             {navItems.map((item) => {
-              const Icon = item.icon;
+              const IconComp = item.icon;
               if (item.badge) {
                 return (
                   <li key={item.label}>
                     <span className={`${styles.navLink} ${styles.disabledNavLink}`}>
-                      <Icon size={16} />
+                      <IconComp size={16} />
                       <span>{item.label}</span>
                       <span className="text-[10px] bg-accent/30 text-primary px-1.5 py-0.5 rounded-full font-bold">
                         {item.badge}
@@ -59,7 +68,7 @@ const Navbar = () => {
                       `${styles.navLink} ${isActive ? styles.activeNavLink : ''}`
                     }
                   >
-                    <Icon size={16} />
+                    <IconComp size={16} />
                     <span>{item.label}</span>
                   </NavLink>
                 </li>
@@ -83,7 +92,7 @@ const Navbar = () => {
           )}
 
           <Button variant="ghost" size="sm" onClick={handleLogout} title="Logout">
-            <LogOut size={16} />
+            <LogOutIcon size={16} />
             <span className="hidden md:inline">Logout</span>
           </Button>
 
@@ -92,7 +101,7 @@ const Navbar = () => {
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation menu"
           >
-            {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}
           </button>
         </div>
       </div>
@@ -101,14 +110,14 @@ const Navbar = () => {
       {mobileOpen && (
         <div className={`${styles.mobileNav} ${styles.mobileNavOpen}`}>
           {navItems.map((item) => {
-            const Icon = item.icon;
+            const IconComp = item.icon;
             if (item.badge) {
               return (
                 <span
                   key={item.label}
                   className={`${styles.navLink} ${styles.disabledNavLink} py-3`}
                 >
-                  <Icon size={18} />
+                  <IconComp size={18} />
                   <span>{item.label}</span>
                   <span className="text-[10px] bg-accent/30 text-primary px-1.5 py-0.5 rounded-full font-bold ml-auto">
                     {item.badge}
@@ -125,7 +134,7 @@ const Navbar = () => {
                   `${styles.navLink} ${isActive ? styles.activeNavLink : ''} py-3`
                 }
               >
-                <Icon size={18} />
+                <IconComp size={18} />
                 <span>{item.label}</span>
               </NavLink>
             );

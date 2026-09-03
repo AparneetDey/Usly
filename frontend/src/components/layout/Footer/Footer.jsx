@@ -1,4 +1,5 @@
 import React from 'react';
+import { HeartIcon } from '../../icons/index.js';
 import styles from './Footer.module.css';
 
 const Footer = () => {
@@ -7,7 +8,7 @@ const Footer = () => {
       <div className={styles.inner}>
         <div className={styles.text}>
           <span>Usly</span>
-          <span className={styles.heart}>❤️</span>
+          <HeartIcon size={14} filled className="text-highlight inline-block mx-1" />
           <span>Our Private Space</span>
         </div>
         <div>

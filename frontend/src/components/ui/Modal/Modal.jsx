@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import { CloseIcon } from '../../icons/index.js';
 import styles from './Modal.module.css';
 
 const Modal = ({ isOpen, onClose, title, children, maxWidth }) => {
@@ -31,7 +31,7 @@ const Modal = ({ isOpen, onClose, title, children, maxWidth }) => {
         <div className={styles.header}>
           <h3 className={styles.title}>{title}</h3>
           <button className={styles.closeButton} onClick={onClose} aria-label="Close modal">
-            <X size={18} />
+            <CloseIcon size={18} />
           </button>
         </div>
         <div className={styles.body}>{children}</div>

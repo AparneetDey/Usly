@@ -1,5 +1,10 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, Plus, ChevronDown } from 'lucide-react';
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+  PlusIcon,
+} from '../../icons/index.js';
 import { MONTH_NAMES } from '../dateUtils.js';
 import Button from '../../ui/Button/Button.jsx';
 import styles from './CalendarHeader.module.css';
@@ -20,13 +25,13 @@ const CalendarHeader = ({
       <div className={styles.leftControls}>
         <div className={styles.navGroup}>
           <Button variant="ghost" size="sm" onClick={onPrevMonth} title="Previous Month">
-            <ChevronLeft size={18} />
+            <ChevronLeftIcon size={18} />
           </Button>
           <Button variant="ghost" size="sm" onClick={onToday} title="Go to Today">
             Today
           </Button>
           <Button variant="ghost" size="sm" onClick={onNextMonth} title="Next Month">
-            <ChevronRight size={18} />
+            <ChevronRightIcon size={18} />
           </Button>
         </div>
 
@@ -44,7 +49,7 @@ const CalendarHeader = ({
                 </option>
               ))}
             </select>
-            <ChevronDown size={16} className={styles.yearChevron} />
+            <ChevronDownIcon size={16} className={styles.yearChevron} />
           </div>
         </div>
       </div>
@@ -52,7 +57,7 @@ const CalendarHeader = ({
       <div className={styles.rightControls}>
         <span className={styles.viewBadge}>Month View</span>
         <Button variant="primary" onClick={onAddEvent}>
-          <Plus size={18} />
+          <PlusIcon size={18} />
           <span>Add Event</span>
         </Button>
       </div>

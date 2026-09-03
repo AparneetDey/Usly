@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Plus, Send, Inbox } from 'lucide-react';
+import {
+  MailIcon,
+  PlusIcon,
+  SendIcon,
+  OpenMailIcon,
+} from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
@@ -14,8 +19,8 @@ import authService from '../../services/auth.service.js';
 import styles from '../../components/letters/letters.module.css';
 
 const Letters = () => {
-  const { user, partner: authPartner } = useAuth();
-  const [activeTab, setActiveTab] = useState('received'); // 'received' | 'sent'
+  const { partner: authPartner } = useAuth();
+  const [activeTab, setActiveTab] = useState('received');
   const [receivedLetters, setReceivedLetters] = useState([]);
   const [sentLetters, setSentLetters] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +76,7 @@ const Letters = () => {
     setSubmitting(true);
     try {
       await letterService.createLetter(letterData);
-      setToastMessage('Letter sent successfully! 💌');
+      setToastMessage('Letter sent successfully!');
       setIsWriteOpen(false);
       fetchLettersAndPartner();
     } catch (err) {
@@ -98,11 +103,11 @@ const Letters = () => {
     <PageContainer>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Private Letters 💌</h1>
+          <h1 className={styles.title}>Private Letters</h1>
           <p className={styles.subtitle}>Secret love notes and future messages just for us</p>
         </div>
         <Button variant="primary" onClick={() => setIsWriteOpen(true)}>
-          <Plus size={18} />
+          <PlusIcon size={18} />
           <span>Write a Letter</span>
         </Button>
       </div>
@@ -112,7 +117,7 @@ const Letters = () => {
           className={`${styles.tabBtn} ${activeTab === 'received' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('received')}
         >
-          <Inbox size={16} />
+          <MailIcon size={16} />
           <span>Received ({receivedLetters.length})</span>
         </button>
 
@@ -120,7 +125,7 @@ const Letters = () => {
           className={`${styles.tabBtn} ${activeTab === 'sent' ? styles.activeTab : ''}`}
           onClick={() => setActiveTab('sent')}
         >
-          <Send size={16} />
+          <SendIcon size={16} />
           <span>Sent ({sentLetters.length})</span>
         </button>
       </div>
@@ -129,16 +134,16 @@ const Letters = () => {
         <Loader message="Gathering your letters..." />
       ) : currentLetters.length === 0 ? (
         <EmptyState
-          icon="💌"
+          icon={<MailIcon size={40} className="text-primary" />}
           title={activeTab === 'received' ? 'No letters received yet' : 'No sent letters'}
           description={
             activeTab === 'received'
               ? `Maybe ${partner?.name || 'your partner'} is writing one right now?`
-              : `Write a sweet note or schedule a Valentine letter for ${partner?.name || 'your love'}.`
+              : `Write a sweet note or schedule a letter for ${partner?.name || 'your love'}.`
           }
           action={
             <Button variant="primary" size="sm" onClick={() => setIsWriteOpen(true)}>
-              <Plus size={16} />
+              <PlusIcon size={16} />
               <span>Write First Letter</span>
             </Button>
           }

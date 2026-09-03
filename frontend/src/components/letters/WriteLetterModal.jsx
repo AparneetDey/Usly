@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { SendIcon, MailIcon } from '../icons/index.js';
 import Modal from '../ui/Modal/Modal.jsx';
 import Input from '../ui/Input/Input.jsx';
 import Button from '../ui/Button/Button.jsx';
@@ -24,10 +25,13 @@ const WriteLetterModal = ({ isOpen, onClose, onSend, partnerName, partnerId, loa
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Write a Letter 💌" maxWidth="560px">
+    <Modal isOpen={isOpen} onClose={onClose} title="Write a Letter" maxWidth="560px">
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="p-3.5 bg-surface-alt border border-border rounded-lg text-xs font-semibold text-text flex items-center justify-between">
-          <span>Recipient:</span>
+          <span className="flex items-center gap-1.5">
+            <MailIcon size={16} className="text-primary" />
+            <span>Recipient:</span>
+          </span>
           <span className="text-primary font-bold">{partnerName || 'Your Love'}</span>
         </div>
 
@@ -77,7 +81,8 @@ const WriteLetterModal = ({ isOpen, onClose, onSend, partnerName, partnerId, loa
             Cancel
           </Button>
           <Button type="submit" variant="primary" loading={loading}>
-            Send Letter 💌
+            <SendIcon size={16} />
+            <span>Send Letter</span>
           </Button>
         </div>
       </form>

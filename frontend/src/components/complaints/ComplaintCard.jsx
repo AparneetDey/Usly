@@ -1,22 +1,16 @@
 import React from 'react';
-import { MessageCircle, Trash2 } from 'lucide-react';
+import {
+  ComplaintIcon,
+  MessageCircleIcon,
+  TrashIcon,
+} from '../icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import Card from '../ui/Card/Card.jsx';
 import Badge from '../ui/Badge/Badge.jsx';
 import styles from './complaints.module.css';
 
-const CATEGORY_EMOJIS = {
-  food: '🍟',
-  late: '⏰',
-  ignored: '🙈',
-  annoying: '😜',
-  serious: '🥺',
-  funny: '😂',
-  other: '📌',
-};
-
 const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
-  const { user, partner } = useAuth();
+  const { partner } = useAuth();
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -34,7 +28,7 @@ const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
       <div>
         <div className={styles.cardHeader}>
           <div className="flex items-center gap-1.5">
-            <span className="text-xl">{CATEGORY_EMOJIS[complaint.category] || '😭'}</span>
+            <ComplaintIcon size={20} className="text-primary" />
             <h3 className={styles.cardTitle}>{complaint.title}</h3>
           </div>
           <Badge type={complaint.status}>{complaint.status}</Badge>
@@ -52,7 +46,7 @@ const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
         <div className="flex items-center gap-2">
           {complaint.responses?.length > 0 && (
             <span className="flex items-center gap-1 text-xs font-semibold text-primary">
-              <MessageCircle size={14} />
+              <MessageCircleIcon size={14} />
               <span>{complaint.responses.length}</span>
             </span>
           )}
@@ -66,7 +60,7 @@ const ComplaintCard = ({ complaint, currentUserId, onClick, onDelete }) => {
               className="p-1 text-muted hover:text-highlight transition-colors ml-1"
               title="Delete Complaint"
             >
-              <Trash2 size={14} />
+              <TrashIcon size={14} />
             </button>
           )}
         </div>

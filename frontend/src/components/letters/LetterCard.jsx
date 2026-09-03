@@ -1,5 +1,10 @@
 import React from 'react';
-import { Lock, Trash2 } from 'lucide-react';
+import {
+  LockIcon,
+  MailIcon,
+  OpenMailIcon,
+  TrashIcon,
+} from '../icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import styles from './letters.module.css';
 
@@ -26,7 +31,15 @@ const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
     >
       <div>
         <div className={styles.topRow}>
-          <span className={styles.envelopeIcon}>{letter.isLocked ? '🔒' : '💌'}</span>
+          <span className={styles.envelopeIcon}>
+            {letter.isLocked ? (
+              <LockIcon size={24} className="text-primary" />
+            ) : letter.isRead ? (
+              <OpenMailIcon size={24} className="text-secondary" />
+            ) : (
+              <MailIcon size={24} className="text-primary" />
+            )}
+          </span>
           {!isSent && !letter.isRead && !letter.isLocked && (
             <span className={styles.unreadBadge}>New</span>
           )}
@@ -39,7 +52,7 @@ const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
 
         {letter.isLocked ? (
           <div className={styles.lockedNotice}>
-            <Lock size={14} />
+            <LockIcon size={14} />
             <span>Open when ready on {formatDate(letter.scheduledFor)}</span>
           </div>
         ) : (
@@ -63,7 +76,7 @@ const LetterCard = ({ letter, isSent = false, onClick, onDelete }) => {
             className="p-1 text-muted hover:text-highlight transition-colors"
             title="Delete Letter"
           >
-            <Trash2 size={14} />
+            <TrashIcon size={14} />
           </button>
         )}
       </div>

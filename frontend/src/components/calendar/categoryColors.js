@@ -1,8 +1,17 @@
+import {
+  HeartIcon,
+  GiftIcon,
+  LocationPinIcon,
+  StarIcon,
+  CalendarIcon,
+} from '../icons/index.js';
+
 export const CATEGORY_CONFIG = {
   anniversary: {
     key: 'anniversary',
     label: 'Anniversary',
     emoji: '❤️',
+    iconComponent: HeartIcon,
     bg: '#FFF1F2',
     border: '#FECDD3',
     text: '#E11D48',
@@ -12,6 +21,7 @@ export const CATEGORY_CONFIG = {
     key: 'birthday',
     label: 'Birthday',
     emoji: '🎂',
+    iconComponent: GiftIcon,
     bg: '#FDF2F8',
     border: '#FBCFE8',
     text: '#BE185D',
@@ -21,6 +31,7 @@ export const CATEGORY_CONFIG = {
     key: 'first_date',
     label: 'First Date',
     emoji: '🌸',
+    iconComponent: HeartIcon,
     bg: '#F5F3FF',
     border: '#DDD6FE',
     text: '#6D28D9',
@@ -30,6 +41,7 @@ export const CATEGORY_CONFIG = {
     key: 'trip',
     label: 'Trip',
     emoji: '✈️',
+    iconComponent: LocationPinIcon,
     bg: '#F3E8FF',
     border: '#E9D5FF',
     text: '#7C3AED',
@@ -39,6 +51,7 @@ export const CATEGORY_CONFIG = {
     key: 'special_day',
     label: 'Special Day',
     emoji: '✨',
+    iconComponent: StarIcon,
     bg: '#EDE9FE',
     border: '#C4B5FD',
     text: '#5B21B6',
@@ -48,6 +61,7 @@ export const CATEGORY_CONFIG = {
     key: 'custom',
     label: 'Custom',
     emoji: '📌',
+    iconComponent: CalendarIcon,
     bg: '#F8F6FC',
     border: '#D8CCEA',
     text: '#24132F',

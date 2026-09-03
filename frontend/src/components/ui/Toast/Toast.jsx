@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { HeartIcon, WarningIcon } from '../../icons/index.js';
 import styles from './Toast.module.css';
 
 const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
@@ -14,7 +15,13 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
 
   return (
     <div className={`${styles.toast} ${styles[type]}`}>
-      <span>{type === 'success' ? '💖' : '⚠️'}</span>
+      <span>
+        {type === 'success' ? (
+          <HeartIcon size={16} filled className="text-accent" />
+        ) : (
+          <WarningIcon size={16} className="text-highlight" />
+        )}
+      </span>
       <span>{message}</span>
     </div>
   );

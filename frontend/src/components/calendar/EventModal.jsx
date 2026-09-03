@@ -5,12 +5,12 @@ import Select from '../ui/Select/Select.jsx';
 import Button from '../ui/Button/Button.jsx';
 
 const EVENT_TYPES = [
-  { value: 'anniversary', label: '❤️ Anniversary' },
-  { value: 'birthday', label: '🎂 Birthday' },
-  { value: 'first_date', label: '🌸 First Date' },
-  { value: 'trip', label: '✈️ Trip' },
-  { value: 'special_day', label: '✨ Special Day' },
-  { value: 'custom', label: '💫 Custom' },
+  { value: 'anniversary', label: 'Anniversary' },
+  { value: 'birthday', label: 'Birthday' },
+  { value: 'first_date', label: 'First Date' },
+  { value: 'trip', label: 'Trip' },
+  { value: 'special_day', label: 'Special Day' },
+  { value: 'custom', label: 'Custom' },
 ];
 
 const RECURRENCE_RULES = [
@@ -73,7 +73,7 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={eventToEdit ? 'Edit Special Day 📅' : 'Add Special Day 📅'}
+      title={eventToEdit ? 'Edit Special Day' : 'Add Special Day'}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <Input
