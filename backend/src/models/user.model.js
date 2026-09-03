@@ -27,9 +27,29 @@ const userSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    avatarFileId: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     partner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
+      default: null,
+    },
+    pendingEmail: {
+      type: String,
+      default: null,
+      lowercase: true,
+      trim: true,
+    },
+    emailChangeTokenHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    emailChangeExpiresAt: {
+      type: Date,
       default: null,
     },
   },

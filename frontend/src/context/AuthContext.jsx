@@ -56,6 +56,13 @@ export const AuthProvider = ({ children }) => {
     return loggedInUser;
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser((prev) => ({
+      ...prev,
+      ...updatedUserData,
+    }));
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -74,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user,
         refreshUser: checkAuth,
         fetchPartner,

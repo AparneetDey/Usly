@@ -5,6 +5,10 @@ import {
   logout,
   getCurrentUser,
   getPartnerDetails,
+  updateProfile,
+  requestEmailChange,
+  verifyEmailChange,
+  changePassword,
 } from '../controllers/auth.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
@@ -39,10 +43,38 @@ router.post('/logout', protect, logout);
 router.get('/me', protect, getCurrentUser);
 
 /**
+ * @route   PATCH /api/auth/me
+ * @desc    Update user profile (name, avatar, avatarFileId)
+ * @access  Private
+ */
+router.patch('/me', protect, updateProfile);
+
+/**
  * @route   GET /api/auth/partner
  * @desc    Get partner details for logged in user
  * @access  Private
  */
 router.get('/partner', protect, getPartnerDetails);
+
+/**
+ * @route   POST /api/auth/change-email/request
+ * @desc    Request an email address change & send verification link
+ * @access  Private
+ */
+router.post('/change-email/request', protect, requestEmailChange);
+
+/**
+ * @route   POST /api/auth/change-email/verify
+ * @desc    Verify new email address using token
+ * @access  Public / Private
+ */
+router.post('/change-email/verify', verifyEmailChange);
+
+/**
+ * @route   PATCH /api/auth/change-password
+ * @desc    Change user password
+ * @access  Private
+ */
+router.patch('/change-password', protect, changePassword);
 
 export default router;

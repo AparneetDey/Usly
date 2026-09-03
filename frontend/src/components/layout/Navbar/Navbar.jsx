@@ -6,6 +6,7 @@ import {
   MailIcon,
   ComplaintIcon,
   ImageIcon,
+  UserIcon,
   LogOutIcon,
   MenuIcon,
   CloseIcon,
@@ -79,7 +80,7 @@ const Navbar = () => {
 
         <div className={styles.userMenu}>
           {user && (
-            <div className={styles.userInfo}>
+            <Link to="/settings" className={`${styles.userInfo} hover:opacity-90 transition-opacity`} title="Account Settings">
               <div className={styles.avatar}>
                 {user.avatar ? (
                   <img src={user.avatar} alt={user.name} className={styles.avatarImg} />
@@ -88,7 +89,7 @@ const Navbar = () => {
                 )}
               </div>
               <span className={styles.userName}>{user.name}</span>
-            </div>
+            </Link>
           )}
 
           <Button variant="ghost" size="sm" onClick={handleLogout} title="Logout">
@@ -139,6 +140,17 @@ const Navbar = () => {
               </NavLink>
             );
           })}
+
+          <NavLink
+            to="/settings"
+            onClick={() => setMobileOpen(false)}
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.activeNavLink : ''} py-3 border-t border-border mt-2 pt-3`
+            }
+          >
+            <UserIcon size={18} />
+            <span>Account Settings</span>
+          </NavLink>
         </div>
       )}
     </header>

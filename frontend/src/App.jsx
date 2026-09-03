@@ -8,6 +8,8 @@ import Home from './pages/Home/Home.jsx';
 import Calendar from './pages/Calendar/Calendar.jsx';
 import Letters from './pages/Letters/Letters.jsx';
 import Complaints from './pages/Complaints/Complaints.jsx';
+import Settings from './pages/Settings/Settings.jsx';
+import VerifyEmailChange from './pages/VerifyEmailChange/VerifyEmailChange.jsx';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/letters" element={<Letters />} />
             <Route path="/complaints" element={<Complaints />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/verify-email-change" element={<VerifyEmailChange />} />
           </Route>
 
           {/* Catch-all Fallback */}
