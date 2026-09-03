@@ -21,16 +21,28 @@ const MomentsSection = () => {
   } = useMoments();
 
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
-  const [selectedMomentsList, setSelectedMomentsList] = useState([]);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
   const [initialIndex, setInitialIndex] = useState(0);
 
   const userMoments = moments.filter((m) => (m.createdBy?._id || m.createdBy) === user?._id);
   const partnerMoments = moments.filter((m) => (m.createdBy?._id || m.createdBy) === partner?._id);
 
+  // Chronologically sort all active moments (oldest active first for story playback queue)
+  const chronologicalActiveMoments = [...moments].sort(
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+  );
+
   const handleOpenUserMoments = () => {
     if (userMoments.length > 0) {
-      setSelectedMomentsList(userMoments);
-      setInitialIndex(0);
+      // Find the oldest active moment for the user to start playback from
+      const userMomentsOldestFirst = [...userMoments].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+      const targetId = userMomentsOldestFirst[0]?._id;
+      const idx = chronologicalActiveMoments.findIndex((m) => m._id === targetId);
+
+      setInitialIndex(idx >= 0 ? idx : 0);
+      setIsViewerOpen(true);
     } else {
       setIsCreatorOpen(true);
     }
@@ -38,8 +50,15 @@ const MomentsSection = () => {
 
   const handleOpenPartnerMoments = () => {
     if (partnerMoments.length > 0) {
-      setSelectedMomentsList(partnerMoments);
-      setInitialIndex(0);
+      // Find the oldest active moment for the partner to start playback from
+      const partnerMomentsOldestFirst = [...partnerMoments].sort(
+        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+      );
+      const targetId = partnerMomentsOldestFirst[0]?._id;
+      const idx = chronologicalActiveMoments.findIndex((m) => m._id === targetId);
+
+      setInitialIndex(idx >= 0 ? idx : 0);
+      setIsViewerOpen(true);
     }
   };
 
@@ -135,36 +154,25 @@ const MomentsSection = () => {
 
       {/* Multi-Moment Viewer Modal */}
       <MomentViewerModal
-        isOpen={selectedMomentsList.length > 0}
-        onClose={() => setSelectedMomentsList([])}
-        momentsList={selectedMomentsList}
+        isOpen={isViewerOpen}
+        onClose={() => setIsViewerOpen(false)}
+        momentsList={chronologicalActiveMoments}
         initialIndex={initialIndex}
         currentUserId={user?._id}
         onDelete={async (id) => {
           await deleteMoment(id);
-          setSelectedMomentsList((prev) => {
-            const updated = prev.filter((m) => m._id !== id);
-            if (updated.length === 0) {
-              return [];
-            }
-            return updated;
-          });
         }}
         onAddReaction={async (id, reaction) => {
-          const updated = await addReaction(id, reaction);
-          setSelectedMomentsList((prev) => prev.map((m) => (m._id === id ? updated : m)));
+          await addReaction(id, reaction);
         }}
         onRemoveReaction={async (id) => {
-          const updated = await removeReaction(id);
-          setSelectedMomentsList((prev) => prev.map((m) => (m._id === id ? updated : m)));
+          await removeReaction(id);
         }}
         onAddComment={async (id, msg) => {
-          const updated = await addComment(id, msg);
-          setSelectedMomentsList((prev) => prev.map((m) => (m._id === id ? updated : m)));
+          await addComment(id, msg);
         }}
         onDeleteComment={async (id, commentId) => {
-          const updated = await deleteComment(id, commentId);
-          setSelectedMomentsList((prev) => prev.map((m) => (m._id === id ? updated : m)));
+          await deleteComment(id, commentId);
         }}
       />
     </div>

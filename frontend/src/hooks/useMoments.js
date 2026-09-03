@@ -23,13 +23,19 @@ export const useMoments = () => {
     fetchMoments();
   }, [fetchMoments]);
 
-  // Background Preloader: Preloads moment image media into browser memory as soon as Home page loads
+  // Background Preloader: Preloads moment image & video media into browser memory as soon as Home page loads
   useEffect(() => {
     if (moments && moments.length > 0) {
       moments.forEach((m) => {
-        if (m.media?.type === 'image' && m.media?.url) {
-          const img = new Image();
-          img.src = m.media.url;
+        if (m.media?.url) {
+          if (m.media?.type === 'image') {
+            const img = new Image();
+            img.src = m.media.url;
+          } else if (m.media?.type === 'video') {
+            const video = document.createElement('video');
+            video.preload = 'auto';
+            video.src = m.media.url;
+          }
         }
       });
     }

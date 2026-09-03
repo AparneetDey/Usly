@@ -8,7 +8,6 @@ import {
 } from '../icons/index.js';
 import Button from '../ui/Button/Button.jsx';
 import Input from '../ui/Input/Input.jsx';
-import { Skeleton } from '../ui/Skeleton/index.js';
 import styles from './Moments.module.css';
 
 const REACTION_OPTIONS = ['❤️', '🥰', '😍', '😂', '😢', '✨'];
@@ -27,6 +26,8 @@ const MomentViewerModal = ({
   onAddComment,
   onDeleteComment,
 }) => {
+  const activeMoments = Array.isArray(momentsList) ? momentsList : [];
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -34,33 +35,43 @@ const MomentViewerModal = ({
 
   const [commentMessage, setCommentMessage] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
-  const [mediaLoaded, setMediaLoaded] = useState(false);
-  const [direction, setDirection] = useState('next');
+  const [direction, setDirection] = useState('none');
 
   const videoRef = useRef(null);
   const imgRef = useRef(null);
+  const wasOpenRef = useRef(false);
 
-  const activeMoments = Array.isArray(momentsList) ? momentsList : [];
-  const currentMoment = activeMoments[currentIndex] || null;
-
-  // Sync index when modal opens or initialIndex changes
+  // Sync index and reset states only when modal opens (false -> true)
   useEffect(() => {
-    if (isOpen) {
-      setCurrentIndex(initialIndex);
+    if (isOpen && !wasOpenRef.current) {
+      const safeIndex = Math.min(Math.max(0, initialIndex), Math.max(0, activeMoments.length - 1));
+      setCurrentIndex(safeIndex);
       setProgress(0);
       setIsPaused(false);
       setIsCommentFocused(false);
-      setDirection('next');
+      setDirection('none');
     }
-  }, [isOpen, initialIndex]);
+    wasOpenRef.current = isOpen;
+  }, [isOpen, initialIndex, activeMoments.length]);
 
-  // Reset media loading state when current moment changes
+  // Handle active moments array boundary/deletion sync
   useEffect(() => {
-    setMediaLoaded(false);
+    if (isOpen && activeMoments.length === 0) {
+      onClose();
+    } else if (isOpen && currentIndex >= activeMoments.length) {
+      setCurrentIndex(Math.max(0, activeMoments.length - 1));
+    }
+  }, [isOpen, activeMoments.length, currentIndex, onClose]);
+
+  const currentMoment = activeMoments[currentIndex] || null;
+
+  // Reset progress when current moment changes
+  useEffect(() => {
+    if (!currentMoment) return;
     setProgress(0);
   }, [currentMoment?._id]);
 
-  // Handle advancing to next moment or closing modal if at last moment
+  // Next moment / auto-advance handler
   const handleNext = useCallback(() => {
     if (currentIndex < activeMoments.length - 1) {
       setDirection('next');
@@ -71,7 +82,7 @@ const MomentViewerModal = ({
     }
   }, [currentIndex, activeMoments.length, onClose]);
 
-  // Handle going back to previous moment
+  // Prev moment handler
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
       setDirection('prev');
@@ -87,11 +98,7 @@ const MomentViewerModal = ({
 
   // Image Auto-Advance Engine (5-Second Timer)
   useEffect(() => {
-    if (!isOpen || !currentMoment || currentMoment.media?.type === 'video') {
-      return;
-    }
-
-    if (isPaused || isCommentFocused) {
+    if (!isOpen || !currentMoment || currentMoment.media?.type === 'video' || isPaused || isCommentFocused) {
       return;
     }
 
@@ -108,7 +115,7 @@ const MomentViewerModal = ({
     }, PROGRESS_STEP_MS);
 
     return () => clearInterval(interval);
-  }, [isOpen, currentMoment?._id, isPaused, isCommentFocused, handleNext]);
+  }, [isOpen, currentMoment?._id, currentMoment?.media?.type, isPaused, isCommentFocused, handleNext]);
 
   // Video Autoplay & Pause Control
   useEffect(() => {
@@ -118,10 +125,10 @@ const MomentViewerModal = ({
 
     if (isPaused || isCommentFocused) {
       videoRef.current.pause();
-    } else if (mediaLoaded) {
+    } else {
       videoRef.current.play().catch(() => {});
     }
-  }, [isOpen, currentMoment, mediaLoaded, isPaused, isCommentFocused]);
+  }, [isOpen, currentMoment?._id, currentMoment?.media?.type, isPaused, isCommentFocused]);
 
   // Video Time Update & Ended Handlers
   const handleVideoTimeUpdate = () => {
@@ -140,6 +147,8 @@ const MomentViewerModal = ({
     if (!isOpen) return;
 
     const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
       if (e.key === 'ArrowLeft') {
         handlePrev();
       } else if (e.key === 'ArrowRight') {
@@ -153,7 +162,7 @@ const MomentViewerModal = ({
 
   if (!isOpen || !currentMoment) return null;
 
-  const isCreator = currentMoment.createdBy?._id === currentUserId;
+  const isCreator = (currentMoment.createdBy?._id || currentMoment.createdBy) === currentUserId;
   const creatorName = isCreator ? 'You' : currentMoment.createdBy?.name || 'Partner';
 
   const userReaction = currentMoment.reactions?.find(
@@ -271,11 +280,6 @@ const MomentViewerModal = ({
                 onClick={() => {
                   if (window.confirm('Delete this moment?')) {
                     onDelete(currentMoment._id);
-                    if (activeMoments.length <= 1) {
-                      onClose();
-                    } else if (currentIndex >= activeMoments.length - 1) {
-                      setCurrentIndex((i) => Math.max(0, i - 1));
-                    }
                   }
                 }}
                 className="p-1.5 text-muted hover:text-highlight transition-colors"
@@ -327,16 +331,10 @@ const MomentViewerModal = ({
             </button>
           )}
 
-          {!mediaLoaded && (
-            <div className="w-full h-80 flex items-center justify-center bg-black/40">
-              <Skeleton width="100%" height="320px" borderRadius="0px" />
-            </div>
-          )}
-
           {/* Media Inner Wrapper with Direction-Aware Slide & Fade Transition */}
           <div
-            key={`${currentMoment._id}_${currentIndex}`}
-            className={`${styles.mediaWrapper} ${direction === 'next' ? styles.slideNext : styles.slidePrev}`}
+            key={`${currentMoment._id}`}
+            className={`${styles.mediaWrapper} ${direction === 'next' ? styles.slideNext : direction === 'prev' ? styles.slidePrev : ''}`}
           >
             {currentMoment.media?.type === 'video' ? (
               <video
@@ -344,20 +342,16 @@ const MomentViewerModal = ({
                 src={currentMoment.media.url}
                 controls
                 playsInline
-                onLoadedData={() => setMediaLoaded(true)}
                 onTimeUpdate={handleVideoTimeUpdate}
                 onEnded={handleVideoEnded}
                 className={styles.momentMedia}
-                style={{ display: mediaLoaded ? 'block' : 'none' }}
               />
             ) : (
               <img
                 ref={imgRef}
                 src={currentMoment.media?.url}
                 alt={currentMoment.caption || 'Moment'}
-                onLoad={() => setMediaLoaded(true)}
                 className={styles.momentMedia}
-                style={{ display: mediaLoaded ? 'block' : 'none' }}
               />
             )}
           </div>

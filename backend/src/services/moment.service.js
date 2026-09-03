@@ -47,7 +47,7 @@ class MomentService {
   async getActiveMoments() {
     const now = new Date();
     return await Moment.find({ expiresAt: { $gt: now } })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .populate('createdBy', 'name avatar')
       .populate('reactions.userId', 'name avatar')
       .populate('comments.userId', 'name avatar');
