@@ -12,7 +12,7 @@ const Footer = () => {
           <span>Our Private Space</span>
         </div>
         <div>
-          <span>Made for two</span>
+          <span>Only for us</span>
         </div>
       </div>
     </footer>
