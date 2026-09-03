@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   UserIcon,
   MailIcon,
@@ -12,18 +12,26 @@ import PageContainer from '../../components/layout/PageContainer/PageContainer.j
 import Input from '../../components/ui/Input/Input.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
 import Toast from '../../components/ui/Toast/Toast.jsx';
+import { Skeleton } from '../../components/ui/Skeleton/index.js';
 import authService from '../../services/auth.service.js';
 import uploadToImageKit from '../../services/imagekit.service.js';
 import styles from './Settings.module.css';
 
 const Settings = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, loading: authLoading } = useAuth();
   const fileInputRef = useRef(null);
 
   // Profile section state
   const [name, setName] = useState(user?.name || '');
   const [updatingProfile, setUpdatingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Sync state when user loads
+  useEffect(() => {
+    if (user?.name) {
+      setName(user.name);
+    }
+  }, [user]);
 
   // Email change section state
   const [newEmail, setNewEmail] = useState('');
@@ -209,13 +217,17 @@ const Settings = () => {
           </div>
 
           <div className={styles.avatarContainer}>
-            <div className={styles.avatarPreview}>
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className={styles.avatarImg} />
-              ) : (
-                getInitials(user?.name)
-              )}
-            </div>
+            {authLoading || !user ? (
+              <Skeleton width="80px" height="80px" variant="circular" />
+            ) : (
+              <div className={styles.avatarPreview}>
+                {user?.avatar ? (
+                  <img src={user.avatar} alt={user.name} className={styles.avatarImg} />
+                ) : (
+                  getInitials(user?.name)
+                )}
+              </div>
+            )}
 
             <div className={styles.avatarActions}>
               <div className="flex items-center gap-2">
@@ -231,6 +243,7 @@ const Settings = () => {
                   size="sm"
                   onClick={() => fileInputRef.current?.click()}
                   loading={uploadingAvatar}
+                  disabled={authLoading}
                 >
                   <ImageIcon size={14} />
                   <span>{uploadingAvatar ? 'Uploading...' : 'Change Avatar'}</span>
@@ -253,26 +266,35 @@ const Settings = () => {
           </div>
 
           <form onSubmit={handleSaveProfile} className={styles.formGrid}>
-            <Input
-              label="Name"
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
+            {authLoading || !user ? (
+              <div className="space-y-4">
+                <Skeleton width="100%" height="40px" borderRadius="8px" />
+                <Skeleton width="100%" height="40px" borderRadius="8px" />
+              </div>
+            ) : (
+              <>
+                <Input
+                  label="Name"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
 
-            <div>
-              <Input
-                label="Email Address"
-                value={user?.email || ''}
-                disabled
-                readOnly
-              />
-              <p className={styles.helpText}>To change your email address, use the Change Email section below.</p>
-            </div>
+                <div>
+                  <Input
+                    label="Email Address"
+                    value={user?.email || ''}
+                    disabled
+                    readOnly
+                  />
+                  <p className={styles.helpText}>To change your email address, use the Change Email section below.</p>
+                </div>
+              </>
+            )}
 
             <div className={styles.formFooter}>
-              <Button type="submit" variant="primary" loading={updatingProfile}>
+              <Button type="submit" variant="primary" loading={updatingProfile} disabled={authLoading}>
                 <CheckIcon size={16} />
                 <span>Save Profile</span>
               </Button>

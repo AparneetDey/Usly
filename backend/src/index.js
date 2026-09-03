@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import app from './app.js';
 import { connectDB } from './config/db.config.js';
+import { startMomentCleanupInterval } from './services/moment-cleanup.service.js';
 
 // Load environment variables
 dotenv.config();
@@ -13,7 +14,10 @@ const startServer = async () => {
     console.log('[Server] Connecting to MongoDB...');
     await connectDB();
 
-    // 2. Start Express server only after database connects successfully
+    // 2. Initialize background scheduler for Moment cleanup (sweeps every 3 minutes)
+    startMomentCleanupInterval(3 * 60 * 1000);
+
+    // 3. Start Express server only after database connects successfully
     const server = app.listen(PORT, () => {
       console.log(`[Server] Usly backend running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     });

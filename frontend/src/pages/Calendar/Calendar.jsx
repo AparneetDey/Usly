@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
   PlusIcon,
   CalendarIcon,
-  ClockIcon,
   ChevronRightIcon,
 } from '../../components/icons/index.js';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Card from '../../components/ui/Card/Card.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
-import Loader from '../../components/ui/Loader/Loader.jsx';
 import Toast from '../../components/ui/Toast/Toast.jsx';
 import ConfirmModal from '../../components/ui/ConfirmModal/ConfirmModal.jsx';
+import { Skeleton } from '../../components/ui/Skeleton/index.js';
 
 import CalendarHeader from '../../components/calendar/CalendarHeader/CalendarHeader.jsx';
 import CalendarGrid from '../../components/calendar/CalendarGrid/CalendarGrid.jsx';
@@ -186,98 +185,101 @@ const Calendar = () => {
       {/* Category Color Legend */}
       <CalendarLegend />
 
-      {loading ? (
-        <Loader message="Loading your romantic calendar..." />
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main 7-Column Calendar Grid */}
-          <div className="lg:col-span-3 flex flex-col gap-4">
-            <CalendarGrid
-              days={gridDays}
-              events={events}
-              selectedDay={selectedDay}
-              onSelectDay={handleSelectDay}
-              onEventClick={handleOpenEventDetail}
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Main 7-Column Calendar Grid */}
+        <div className="lg:col-span-3 flex flex-col gap-4">
+          <CalendarGrid
+            days={gridDays}
+            events={events}
+            selectedDay={selectedDay}
+            onSelectDay={handleSelectDay}
+            onEventClick={handleOpenEventDetail}
+          />
 
-            {/* Selected Date Quick Banner */}
-            {selectedDay && (
-              <Card className="flex items-center justify-between p-4 bg-surface border-border">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon size={18} className="text-primary" />
-                  <span className="font-bold text-text text-sm">
-                    {formatDate(selectedDay.date)}
+          {/* Selected Date Quick Banner */}
+          {selectedDay && (
+            <Card className="flex items-center justify-between p-4 bg-surface border-border">
+              <div className="flex items-center gap-2">
+                <CalendarIcon size={18} className="text-primary" />
+                <span className="font-bold text-text text-sm">
+                  {formatDate(selectedDay.date)}
+                </span>
+                {isToday(selectedDay.date) && (
+                  <span className="text-xs bg-primary text-surface px-2 py-0.5 rounded-full font-bold">
+                    Today
                   </span>
-                  {isToday(selectedDay.date) && (
-                    <span className="text-xs bg-primary text-surface px-2 py-0.5 rounded-full font-bold">
-                      Today
-                    </span>
-                  )}
-                </div>
-
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleOpenAddModal(selectedDay.dateString)}
-                >
-                  <PlusIcon size={14} />
-                  <span>Add Event to Date</span>
-                </Button>
-              </Card>
-            )}
-          </div>
-
-          {/* Side Panel: Upcoming Events */}
-          <div className="lg:col-span-1 flex flex-col gap-4">
-            <Card className="flex flex-col gap-3">
-              <div className="flex items-center justify-between border-b border-border pb-2">
-                <h3 className="font-bold text-text text-base flex items-center gap-1.5">
-                  <CalendarIcon size={18} className="text-primary" />
-                  <span>Upcoming</span>
-                </h3>
-                <span className="text-xs text-muted font-semibold">Next 5</span>
+                )}
               </div>
 
-              {upcomingEvents.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted italic">
-                  Nothing special planned yet. Maybe add something?
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2.5">
-                  {upcomingEvents.map((evt) => {
-                    const config = getCategoryConfig(evt.type);
-                    return (
-                      <div
-                        key={evt._id}
-                        onClick={() => handleOpenEventDetail(evt)}
-                        className="p-2.5 rounded-lg border flex items-center justify-between cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                        style={{
-                          backgroundColor: config.bg,
-                          borderColor: config.border,
-                          color: config.text,
-                        }}
-                      >
-                        <div className="flex items-center gap-2 overflow-hidden">
-                          <span className="text-base">{config.emoji}</span>
-                          <div className="flex flex-col overflow-hidden">
-                            <span className="font-bold text-xs truncate">
-                              {evt.title}
-                            </span>
-                            <span className="text-[11px] opacity-80">
-                              {formatDate(evt.date)}
-                            </span>
-                          </div>
-                        </div>
-                        <ChevronRightIcon size={14} className="opacity-60 shrink-0" />
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleOpenAddModal(selectedDay.dateString)}
+              >
+                <PlusIcon size={14} />
+                <span>Add Event to Date</span>
+              </Button>
             </Card>
-          </div>
+          )}
         </div>
-      )}
+
+        {/* Side Panel: Upcoming Events */}
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          <Card className="flex flex-col gap-3">
+            <div className="flex items-center justify-between border-b border-border pb-2">
+              <h3 className="font-bold text-text text-base flex items-center gap-1.5">
+                <CalendarIcon size={18} className="text-primary" />
+                <span>Upcoming</span>
+              </h3>
+              <span className="text-xs text-muted font-semibold">Next 5</span>
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col gap-2 py-1">
+                <Skeleton width="100%" height="42px" borderRadius="8px" />
+                <Skeleton width="100%" height="42px" borderRadius="8px" />
+                <Skeleton width="100%" height="42px" borderRadius="8px" />
+              </div>
+            ) : upcomingEvents.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted italic">
+                Nothing special planned yet. Maybe add something?
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {upcomingEvents.map((evt) => {
+                  const config = getCategoryConfig(evt.type);
+                  const IconComp = config.iconComponent;
+                  return (
+                    <div
+                      key={evt._id}
+                      onClick={() => handleOpenEventDetail(evt)}
+                      className="p-2.5 rounded-lg border flex items-center justify-between cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-sm"
+                      style={{
+                        backgroundColor: config.bg,
+                        borderColor: config.border,
+                        color: config.text,
+                      }}
+                    >
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <IconComp size={16} color="currentColor" />
+                        <div className="flex flex-col overflow-hidden">
+                          <span className="font-bold text-xs truncate">
+                            {evt.title}
+                          </span>
+                          <span className="text-[11px] opacity-80">
+                            {formatDate(evt.date)}
+                          </span>
+                        </div>
+                      </div>
+                      <ChevronRightIcon size={14} className="opacity-60 shrink-0" />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
 
       {/* Add / Edit Event Form Modal */}
       <EventModal

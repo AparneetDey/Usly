@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
   PlusIcon,
   ComplaintIcon,
-  CheckIcon,
 } from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
-import Loader from '../../components/ui/Loader/Loader.jsx';
 import EmptyState from '../../components/ui/EmptyState/EmptyState.jsx';
 import Toast from '../../components/ui/Toast/Toast.jsx';
+import { ComplaintCardSkeleton } from '../../components/ui/Skeleton/index.js';
 import ComplaintCard from '../../components/complaints/ComplaintCard.jsx';
 import ComplaintDetailModal from '../../components/complaints/ComplaintDetailModal.jsx';
 import CreateComplaintModal from '../../components/complaints/CreateComplaintModal.jsx';
@@ -153,7 +152,11 @@ const Complaints = () => {
       </div>
 
       {loading ? (
-        <Loader message="Fetching complaint box..." />
+        <div className={styles.grid}>
+          <ComplaintCardSkeleton />
+          <ComplaintCardSkeleton />
+          <ComplaintCardSkeleton />
+        </div>
       ) : complaints.length === 0 ? (
         <EmptyState
           icon={<ComplaintIcon size={40} className="text-primary" />}

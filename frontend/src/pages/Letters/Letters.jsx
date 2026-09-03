@@ -3,14 +3,13 @@ import {
   MailIcon,
   PlusIcon,
   SendIcon,
-  OpenMailIcon,
 } from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
-import Loader from '../../components/ui/Loader/Loader.jsx';
 import EmptyState from '../../components/ui/EmptyState/EmptyState.jsx';
 import Toast from '../../components/ui/Toast/Toast.jsx';
+import { LetterCardSkeleton } from '../../components/ui/Skeleton/index.js';
 import LetterCard from '../../components/letters/LetterCard.jsx';
 import LetterDetailModal from '../../components/letters/LetterDetailModal.jsx';
 import WriteLetterModal from '../../components/letters/WriteLetterModal.jsx';
@@ -131,7 +130,11 @@ const Letters = () => {
       </div>
 
       {loading ? (
-        <Loader message="Gathering your letters..." />
+        <div className={styles.grid}>
+          <LetterCardSkeleton />
+          <LetterCardSkeleton />
+          <LetterCardSkeleton />
+        </div>
       ) : currentLetters.length === 0 ? (
         <EmptyState
           icon={<MailIcon size={40} className="text-primary" />}

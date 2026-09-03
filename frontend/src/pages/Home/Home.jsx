@@ -16,7 +16,8 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Card from '../../components/ui/Card/Card.jsx';
 import Badge from '../../components/ui/Badge/Badge.jsx';
-import Loader from '../../components/ui/Loader/Loader.jsx';
+import { SummaryCardSkeleton } from '../../components/ui/Skeleton/index.js';
+import MomentsSection from '../../components/moments/MomentsSection.jsx';
 import eventService from '../../services/event.service.js';
 import letterService from '../../services/letter.service.js';
 import complaintService from '../../services/complaint.service.js';
@@ -115,117 +116,127 @@ const Home = () => {
         </div>
       </div>
 
-      {loading ? (
-        <Loader message="Gathering our memories..." />
-      ) : (
-        <div className={styles.grid}>
-          {/* Next Special Day */}
-          <Card hoverable className={styles.summaryCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <CalendarIcon size={18} className="text-primary" />
-                <span>Next Special Day</span>
-              </div>
-              {nextEvent && <Badge type={nextEvent.type}>{nextEvent.type}</Badge>}
-            </div>
-            <div className={styles.cardBody}>
-              {nextEvent ? (
-                <div>
-                  <h4 className="font-bold text-text text-base mb-1">{nextEvent.title}</h4>
-                  <p className="text-sm text-muted mb-2">{formatDate(nextEvent.date)}</p>
-                  {nextEvent.description && (
-                    <p className="text-xs text-muted line-clamp-2">{nextEvent.description}</p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-muted text-sm">No upcoming events scheduled yet.</p>
-              )}
-            </div>
-            <div className="mt-4 pt-3 border-t border-border">
-              <Link to="/calendar" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                <span>View Calendar</span>
-                <ArrowRightIcon size={12} />
-              </Link>
-            </div>
-          </Card>
+      {/* 24-Hour Moments Feature Section */}
+      <MomentsSection />
 
-          {/* Latest Letter */}
-          <Card hoverable className={styles.summaryCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <MailIcon size={18} className="text-primary" />
-                <span>Latest Letter</span>
+      {/* Summary Cards Grid */}
+      <div className={styles.grid}>
+        {loading ? (
+          <>
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+            <SummaryCardSkeleton />
+          </>
+        ) : (
+          <>
+            {/* Next Special Day */}
+            <Card hoverable className={styles.summaryCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <CalendarIcon size={18} className="text-primary" />
+                  <span>Next Special Day</span>
+                </div>
+                {nextEvent && <Badge type={nextEvent.type}>{nextEvent.type}</Badge>}
               </div>
-              {latestLetter?.isLocked && (
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-primary flex items-center gap-1">
-                  <LockIcon size={12} />
-                  <span>Locked</span>
-                </span>
-              )}
-            </div>
-            <div className={styles.cardBody}>
-              {latestLetter ? (
-                <div>
-                  <h4 className="font-bold text-text text-base mb-1">{latestLetter.title}</h4>
-                  <p className="text-xs text-muted mb-2">
-                    From {latestLetter.from?.name || partner?.name || 'Partner'} • {formatDate(latestLetter.createdAt)}
-                  </p>
-                  {latestLetter.isLocked ? (
-                    <p className="text-xs italic text-muted">
-                      "Opens on {formatDate(latestLetter.scheduledFor)}"
+              <div className={styles.cardBody}>
+                {nextEvent ? (
+                  <div>
+                    <h4 className="font-bold text-text text-base mb-1">{nextEvent.title}</h4>
+                    <p className="text-sm text-muted mb-2">{formatDate(nextEvent.date)}</p>
+                    {nextEvent.description && (
+                      <p className="text-xs text-muted line-clamp-2">{nextEvent.description}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted text-sm">No upcoming events scheduled yet.</p>
+                )}
+              </div>
+              <div className="mt-4 pt-3 border-t border-border">
+                <Link to="/calendar" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                  <span>View Calendar</span>
+                  <ArrowRightIcon size={12} />
+                </Link>
+              </div>
+            </Card>
+
+            {/* Latest Letter */}
+            <Card hoverable className={styles.summaryCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <MailIcon size={18} className="text-primary" />
+                  <span>Latest Letter</span>
+                </div>
+                {latestLetter?.isLocked && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-primary flex items-center gap-1">
+                    <LockIcon size={12} />
+                    <span>Locked</span>
+                  </span>
+                )}
+              </div>
+              <div className={styles.cardBody}>
+                {latestLetter ? (
+                  <div>
+                    <h4 className="font-bold text-text text-base mb-1">{latestLetter.title}</h4>
+                    <p className="text-xs text-muted mb-2">
+                      From {latestLetter.from?.name || partner?.name || 'Partner'} • {formatDate(latestLetter.createdAt)}
                     </p>
-                  ) : (
-                    <p className="text-xs text-muted line-clamp-2">{latestLetter.content}</p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-muted text-sm">No letters received yet. Write one for {partner?.name || 'your love'}!</p>
-              )}
-            </div>
-            <div className="mt-4 pt-3 border-t border-border">
-              <Link to="/letters" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                <span>Open Letters</span>
-                <ArrowRightIcon size={12} />
-              </Link>
-            </div>
-          </Card>
-
-          {/* Latest Complaint */}
-          <Card hoverable className={styles.summaryCard}>
-            <div className={styles.cardHeader}>
-              <div className={styles.cardTitle}>
-                <ComplaintIcon size={18} className="text-primary" />
-                <span>Complaint Box</span>
+                    {latestLetter.isLocked ? (
+                      <p className="text-xs italic text-muted">
+                        "Opens on {formatDate(latestLetter.scheduledFor)}"
+                      </p>
+                    ) : (
+                      <p className="text-xs text-muted line-clamp-2">{latestLetter.content}</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted text-sm">No letters received yet. Write one for {partner?.name || 'your love'}!</p>
+                )}
               </div>
-              {latestComplaint && (
-                <Badge type={latestComplaint.status}>{latestComplaint.status}</Badge>
-              )}
-            </div>
-            <div className={styles.cardBody}>
-              {latestComplaint ? (
-                <div>
-                  <h4 className="font-bold text-text text-base mb-1">{latestComplaint.title}</h4>
-                  <p className="text-xs text-muted mb-2 line-clamp-2">{latestComplaint.description}</p>
-                  {latestComplaint.responses?.length > 0 && (
-                    <span className="text-xs text-primary font-semibold flex items-center gap-1">
-                      <MessageCircleIcon size={14} />
-                      <span>{latestComplaint.responses.length} response(s)</span>
-                    </span>
-                  )}
+              <div className="mt-4 pt-3 border-t border-border">
+                <Link to="/letters" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                  <span>Open Letters</span>
+                  <ArrowRightIcon size={12} />
+                </Link>
+              </div>
+            </Card>
+
+            {/* Latest Complaint */}
+            <Card hoverable className={styles.summaryCard}>
+              <div className={styles.cardHeader}>
+                <div className={styles.cardTitle}>
+                  <ComplaintIcon size={18} className="text-primary" />
+                  <span>Complaint Box</span>
                 </div>
-              ) : (
-                <p className="text-muted text-sm">All good! No active complaints at the moment.</p>
-              )}
-            </div>
-            <div className="mt-4 pt-3 border-t border-border">
-              <Link to="/complaints" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
-                <span>Open Complaint Box</span>
-                <ArrowRightIcon size={12} />
-              </Link>
-            </div>
-          </Card>
-        </div>
-      )}
+                {latestComplaint && (
+                  <Badge type={latestComplaint.status}>{latestComplaint.status}</Badge>
+                )}
+              </div>
+              <div className={styles.cardBody}>
+                {latestComplaint ? (
+                  <div>
+                    <h4 className="font-bold text-text text-base mb-1">{latestComplaint.title}</h4>
+                    <p className="text-xs text-muted mb-2 line-clamp-2">{latestComplaint.description}</p>
+                    {latestComplaint.responses?.length > 0 && (
+                      <span className="text-xs text-primary font-semibold flex items-center gap-1">
+                        <MessageCircleIcon size={14} />
+                        <span>{latestComplaint.responses.length} response(s)</span>
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-muted text-sm">All good! No active complaints at the moment.</p>
+                )}
+              </div>
+              <div className="mt-4 pt-3 border-t border-border">
+                <Link to="/complaints" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline">
+                  <span>Open Complaint Box</span>
+                  <ArrowRightIcon size={12} />
+                </Link>
+              </div>
+            </Card>
+          </>
+        )}
+      </div>
 
       {/* Quick Action Navigation Buttons */}
       <div className={styles.quickActions}>
