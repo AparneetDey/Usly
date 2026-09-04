@@ -52,7 +52,6 @@ const Login = () => {
         <div className={styles.logo}>
           <img src="/usly-logo.png" alt="Usly Logo" className="h-12 w-auto mx-auto mb-2" />
         </div>
-        <h1 className={styles.title}>Usly</h1>
         <p className={styles.subtitle}>Welcome back to our private corner</p>
 
         {error && (

@@ -64,6 +64,26 @@ const momentSchema = new mongoose.Schema(
         enum: ['image', 'video'],
         required: [true, 'Media type must be image or video'],
       },
+      transform: {
+        scale: {
+          type: Number,
+          default: 1,
+          min: 1,
+          max: 3,
+        },
+        x: {
+          type: Number,
+          default: 0,
+          min: -1,
+          max: 1,
+        },
+        y: {
+          type: Number,
+          default: 0,
+          min: -1,
+          max: 1,
+        },
+      },
     },
     caption: {
       type: String,

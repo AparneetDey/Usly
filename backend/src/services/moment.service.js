@@ -22,12 +22,19 @@ class MomentService {
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
 
+    const transform = {
+      scale: Math.max(1, Math.min(3, Number(media.transform?.scale) || 1)),
+      x: Math.max(-1, Math.min(1, Number(media.transform?.x) || 0)),
+      y: Math.max(-1, Math.min(1, Number(media.transform?.y) || 0)),
+    };
+
     const moment = await Moment.create({
       createdBy,
       media: {
         url: media.url,
         fileId: media.fileId,
         type: media.type,
+        transform,
       },
       caption: caption ? caption.trim() : '',
       duration: Number(duration) || 0,

@@ -3,6 +3,7 @@ import { ImageIcon, PlusIcon, CloseIcon } from '../icons/index.js';
 import Modal from '../ui/Modal/Modal.jsx';
 import Input from '../ui/Input/Input.jsx';
 import Button from '../ui/Button/Button.jsx';
+import MediaPositionEditor from './MediaPositionEditor.jsx';
 import uploadToImageKit from '../../services/imagekit.service.js';
 import styles from './Moments.module.css';
 
@@ -13,6 +14,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
   const [mediaType, setMediaType] = useState('image'); // 'image' | 'video'
   const [duration, setDuration] = useState(0);
   const [caption, setCaption] = useState('');
+  const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
 
@@ -22,6 +24,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
     setMediaType('image');
     setDuration(0);
     setCaption('');
+    setTransform({ scale: 1, x: 0, y: 0 });
     setError('');
     setUploading(false);
   };
@@ -52,6 +55,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
     const typeStr = isVideo ? 'video' : 'image';
     setMediaType(typeStr);
     setSelectedFile(file);
+    setTransform({ scale: 1, x: 0, y: 0 });
 
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
@@ -96,6 +100,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
           url: uploadResult.url,
           fileId: uploadResult.fileId,
           type: mediaType,
+          transform,
         },
         caption,
         duration,
@@ -110,10 +115,10 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Share a Moment" maxWidth="500px">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Share a Moment" maxWidth="480px">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
         {error && (
-          <div className="p-3 bg-highlight/10 border border-highlight/30 rounded-lg text-highlight text-xs font-semibold">
+          <div className="p-2.5 bg-highlight/10 border border-highlight/30 rounded-lg text-highlight text-xs font-semibold">
             {error}
           </div>
         )}
@@ -138,19 +143,21 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
             </p>
           </div>
         ) : (
-          <div className="relative rounded-xl overflow-hidden bg-black max-h-60 flex items-center justify-center">
-            {mediaType === 'video' ? (
-              <video src={previewUrl} controls className="max-h-60 w-full object-contain" />
-            ) : (
-              <img src={previewUrl} alt="Preview" className="max-h-60 w-full object-contain" />
-            )}
+          <div className="relative">
+            <MediaPositionEditor
+              mediaUrl={previewUrl}
+              mediaType={mediaType}
+              transform={transform}
+              onChange={setTransform}
+            />
             <button
               type="button"
               onClick={() => {
                 setSelectedFile(null);
                 setPreviewUrl('');
+                setTransform({ scale: 1, x: 0, y: 0 });
               }}
-              className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black transition-colors"
+              className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black transition-colors z-20"
               title="Remove media"
             >
               <CloseIcon size={16} />
@@ -166,7 +173,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
           maxLength={500}
         />
 
-        <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
+        <div className="flex items-center justify-end gap-3 pt-2.5 border-t border-border">
           <Button variant="ghost" onClick={handleClose} disabled={uploading || parentLoading}>
             Cancel
           </Button>

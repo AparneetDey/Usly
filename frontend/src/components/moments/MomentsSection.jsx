@@ -72,10 +72,10 @@ const MomentsSection = () => {
         <div>
           <h2 className={styles.momentsTitle}>
             <HeartIcon size={18} filled className="text-accent" />
-            <span>24-Hour Moments</span>
+            <span>Moments</span>
           </h2>
           <span className={styles.momentsSubtitle}>
-            Share quick snippets that vanish after 24 hours
+            Share quick snippets of your life
           </span>
         </div>
 

@@ -8,6 +8,7 @@ import {
 } from '../icons/index.js';
 import Button from '../ui/Button/Button.jsx';
 import Input from '../ui/Input/Input.jsx';
+import MomentMediaFrame from './MomentMediaFrame.jsx';
 import styles from './Moments.module.css';
 
 const REACTION_OPTIONS = ['❤️', '🥰', '😍', '😂', '😢', '✨'];
@@ -38,7 +39,6 @@ const MomentViewerModal = ({
   const [direction, setDirection] = useState('none');
 
   const videoRef = useRef(null);
-  const imgRef = useRef(null);
   const wasOpenRef = useRef(false);
 
   // Sync index and reset states only when modal opens (false -> true)
@@ -269,7 +269,7 @@ const MomentViewerModal = ({
                 )}
               </div>
               <span className={styles.momentTime}>
-                {formatRelativeTime(currentMoment.createdAt)} • {formatExpiresIn(currentMoment.expiresAt)}
+                {formatRelativeTime(currentMoment.createdAt)}
               </span>
             </div>
           </div>
@@ -294,9 +294,9 @@ const MomentViewerModal = ({
           </div>
         </div>
 
-        {/* Media Container with Touch/Mouse Hold to Pause */}
+        {/* Shared MomentMediaFrame with Touch/Mouse Hold to Pause */}
         <div
-          className={styles.mediaContainer}
+          className="relative flex-1 min-h-[280px] max-h-[min(52vh,460px)] bg-black overflow-hidden"
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
           onMouseLeave={() => setIsPaused(false)}
@@ -331,29 +331,20 @@ const MomentViewerModal = ({
             </button>
           )}
 
-          {/* Media Inner Wrapper with Direction-Aware Slide & Fade Transition */}
+          {/* Render shared MomentMediaFrame with direction transition animation */}
           <div
             key={`${currentMoment._id}`}
-            className={`${styles.mediaWrapper} ${direction === 'next' ? styles.slideNext : direction === 'prev' ? styles.slidePrev : ''}`}
+            className={`w-full h-full ${direction === 'next' ? styles.slideNext : direction === 'prev' ? styles.slidePrev : ''}`}
           >
-            {currentMoment.media?.type === 'video' ? (
-              <video
-                ref={videoRef}
-                src={currentMoment.media.url}
-                controls
-                playsInline
-                onTimeUpdate={handleVideoTimeUpdate}
-                onEnded={handleVideoEnded}
-                className={styles.momentMedia}
-              />
-            ) : (
-              <img
-                ref={imgRef}
-                src={currentMoment.media?.url}
-                alt={currentMoment.caption || 'Moment'}
-                className={styles.momentMedia}
-              />
-            )}
+            <MomentMediaFrame
+              media={currentMoment.media}
+              alt={currentMoment.caption || 'Moment'}
+              videoRef={videoRef}
+              controls
+              autoPlay={false}
+              onVideoTimeUpdate={handleVideoTimeUpdate}
+              onVideoEnded={handleVideoEnded}
+            />
           </div>
         </div>
 
