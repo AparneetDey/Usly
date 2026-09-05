@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Event from '../models/event.model.js';
 import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js';
+import { sendUpcomingEventReminders } from '../services/event-reminder.service.js';
 
 /**
  * @desc    Create a new special date/calendar event
@@ -182,5 +183,22 @@ export const deleteEvent = asyncHandler(async (req, res) => {
 
   res.status(200).json(
     new ApiResponse(200, null, 'Event deleted successfully')
+  );
+});
+
+/**
+ * @desc    Dev-only trigger for sending upcoming event reminders manually
+ * @route   POST /api/events/dev/trigger-reminders
+ * @access  Private (Dev only)
+ */
+export const triggerEventRemindersDev = asyncHandler(async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new ApiError(403, 'Dev trigger endpoint is disabled in production environment');
+  }
+
+  const result = await sendUpcomingEventReminders();
+
+  res.status(200).json(
+    new ApiResponse(200, result, 'Dev event reminder check triggered successfully')
   );
 });

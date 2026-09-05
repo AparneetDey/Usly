@@ -5,6 +5,7 @@ import {
   getEvent,
   updateEvent,
   deleteEvent,
+  triggerEventRemindersDev,
 } from '../controllers/event.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
@@ -12,6 +13,13 @@ const router = express.Router();
 
 // Protect all event routes with authentication middleware
 router.use(protect);
+
+/**
+ * @route   POST /api/events/dev/trigger-reminders
+ * @desc    Dev-only endpoint to manually trigger event reminder sweep
+ * @access  Private (Dev only)
+ */
+router.post('/dev/trigger-reminders', triggerEventRemindersDev);
 
 /**
  * @route   POST /api/events

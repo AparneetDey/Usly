@@ -64,6 +64,19 @@ const eventSchema = new mongoose.Schema(
       },
       default: 'none',
     },
+    remindersSent: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        sentAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

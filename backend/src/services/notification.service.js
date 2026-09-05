@@ -2,8 +2,55 @@ import User from '../models/user.model.js';
 import emailService from './email.service.js';
 import { getNewLetterEmailTemplate } from '../templates/email/new-letter.template.js';
 import { getNewComplaintEmailTemplate } from '../templates/email/new-complaint.template.js';
+import { getEventReminderEmailTemplate } from '../templates/email/event-reminder.template.js';
 
 class NotificationService {
+  /**
+   * Dispatches an email notification for an upcoming event reminder
+   * @param {Object} params
+   * @param {Object} params.event - Event document
+   * @param {Object} params.recipient - User document (recipient)
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async notifyEventReminder({ event, recipient }) {
+    try {
+      if (!event || !recipient || !recipient.email) {
+        console.warn(`[NotificationService] Cannot send event reminder: Event or recipient email missing.`);
+        return { success: false, error: 'Missing event or recipient email' };
+      }
+
+      const recipientName = recipient.name || 'Love';
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173';
+      const eventUrl = `${frontendUrl.replace(/\/$/, '')}/calendar`;
+
+      const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      });
+
+      const { subject, html, text } = getEventReminderEmailTemplate({
+        recipientName,
+        eventTitle: event.title,
+        eventDate: formattedDate,
+        eventDescription: event.description || '',
+        eventUrl,
+      });
+
+      const result = await emailService.sendEmail({
+        to: recipient.email,
+        subject,
+        html,
+        text,
+      });
+
+      return result;
+    } catch (error) {
+      console.error(`[NotificationService] Error dispatching event reminder for event ${event?._id} to ${recipient?.email}:`, error.message);
+      return { success: false, error: error.message };
+    }
+  }
   /**
    * Dispatches an email notification when a letter is delivered to recipient
    * @param {Object} letter - Populated or raw Letter Mongoose document
