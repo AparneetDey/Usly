@@ -110,3 +110,38 @@
   margin-top: 0.4rem;
   line-height: 1.4;
 }
+
+@media (max-width: 640px) {
+  .container {
+    gap: 1.25rem;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .sectionCard {
+    padding: 1.15rem;
+    border-radius: 0.85rem;
+  }
+
+  .avatarContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .avatarPreview {
+    width: 68px;
+    height: 68px;
+    font-size: 1.65rem;
+  }
+
+  .formFooter {
+    justify-content: stretch;
+  }
+
+  .formFooter button {
+    width: 100%;
+  }
+}

@@ -94,3 +94,29 @@
   font-size: 0.8rem;
   color: var(--color-text-secondary);
 }
+
+@media (max-width: 640px) {
+  .header {
+    margin-bottom: 1.25rem;
+    gap: 0.75rem;
+  }
+
+  .title {
+    font-size: 1.4rem;
+  }
+
+  .filterBar {
+    padding-bottom: 0.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .filterBtn {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

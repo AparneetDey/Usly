@@ -88,3 +88,27 @@
     transform: translateY(0) scale(1);
   }
 }
+
+@media (max-width: 640px) {
+  .backdrop {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-height: min(92vh, 760px);
+    border-radius: 1.25rem 1.25rem 0.75rem 0.75rem;
+  }
+
+  .header {
+    padding: 1rem 1.15rem;
+  }
+
+  .title {
+    font-size: 1.05rem;
+  }
+
+  .body {
+    padding: 1rem 1.15rem;
+  }
+}

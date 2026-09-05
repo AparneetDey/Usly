@@ -132,12 +132,38 @@
 }
 
 @media (max-width: 640px) {
+  .headerSection {
+    margin-bottom: 1.5rem;
+  }
   .greeting {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
+  }
+  .subgreeting {
+    font-size: 0.95rem;
   }
   .togetherBanner {
     flex-direction: column;
     text-align: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .counterValue {
+    font-size: 1.65rem;
+  }
+  .grid {
+    grid-template-columns: 1fr;
     gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .actionGrid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+  .actionCard {
+    padding: 1rem 0.75rem;
+  }
+  .actionLabel {
+    font-size: 0.85rem;
   }
 }

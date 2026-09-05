@@ -89,3 +89,84 @@
   font-weight: 700;
   color: var(--color-primary);
 }
+
+@media (max-width: 640px) {
+  .headerContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    width: 100%;
+  }
+
+  .leftControls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .monthYearTitle {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .monthText {
+    font-size: 1.15rem;
+    font-weight: 800;
+  }
+
+  .yearSelectWrapper {
+    flex-shrink: 0;
+  }
+
+  .yearSelect {
+    font-size: 0.9rem;
+    font-weight: 700;
+    height: 32px;
+    padding: 0.15rem 1.5rem 0.15rem 0.45rem;
+  }
+
+  .yearChevron {
+    right: 0.4rem;
+  }
+
+  .navGroup {
+    flex-shrink: 0;
+    padding: 0.15rem;
+  }
+
+  .rightControls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .leftControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .monthYearTitle {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .monthText {
+    font-size: 1.2rem;
+  }
+
+  .navGroup {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -32,7 +32,18 @@
 }
 
 @media (max-width: 640px) {
+  .weekdayCell {
+    padding: 0.4rem 0.1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0;
+  }
   .daysGrid {
     grid-auto-rows: 75px;
+  }
+}
+
+@media (max-width: 480px) {
+  .daysGrid {
+    grid-auto-rows: 68px;
   }
 }
