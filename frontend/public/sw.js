@@ -23,8 +23,8 @@ self.addEventListener('push', (event) => {
       : `Usly • ${rawTitle}`;
     const options = {
       body: data.body || 'You have a new update in Usly.',
-      icon: data.icon || '/usly-logo.png',
-      badge: data.badge || '/usly-logo.png',
+      icon: data.icon || '/letter-icon.png',
+      badge: data.badge || '/letter-icon.png',
       tag: data.data?.notificationId || 'usly-notification',
       renotify: true,
       data: {
