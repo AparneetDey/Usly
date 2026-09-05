@@ -69,8 +69,8 @@ class NotificationService {
         const pushPayload = {
           title: pushTitle,
           body: message,
-          icon: '/usly-logo.png',
-          badge: '/usly-logo.png',
+          icon: '/letter-icon.png',
+          badge: '/letter-icon.png',
           url: resolvedUrl,
           data: {
             notificationId: notification._id,
