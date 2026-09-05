@@ -31,4 +31,8 @@ export { default as SunIcon } from './SunIcon.jsx';
 export { default as MoonIcon } from './MoonIcon.jsx';
 export { default as MessageCircleIcon } from './MessageCircleIcon.jsx';
 export { default as ArrowRightIcon } from './ArrowRightIcon.jsx';
+export { default as CameraIcon } from './CameraIcon.jsx';
+export { default as VideoIcon } from './VideoIcon.jsx';
+export { default as SwitchCameraIcon } from './SwitchCameraIcon.jsx';
+export { default as RotateCcwIcon } from './RotateCcwIcon.jsx';
 export { default as Icon } from './Icon.jsx';

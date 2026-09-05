@@ -1,9 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { ImageIcon, PlusIcon, CloseIcon } from '../icons/index.js';
+import {
+  ImageIcon,
+  PlusIcon,
+  CloseIcon,
+  CameraIcon,
+  VideoIcon,
+} from '../icons/index.js';
 import Modal from '../ui/Modal/Modal.jsx';
 import Input from '../ui/Input/Input.jsx';
 import Button from '../ui/Button/Button.jsx';
 import MediaPositionEditor from './MediaPositionEditor.jsx';
+import CameraCapture from './CameraCapture.jsx';
 import uploadToImageKit from '../../services/imagekit.service.js';
 import styles from './Moments.module.css';
 
@@ -15,16 +22,21 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
   const [duration, setDuration] = useState(0);
   const [caption, setCaption] = useState('');
   const [transform, setTransform] = useState({ scale: 1, x: 0, y: 0 });
+  const [cameraMode, setCameraMode] = useState('none'); // 'none' | 'photo' | 'video'
   const [error, setError] = useState('');
   const [uploading, setUploading] = useState(false);
 
   const resetForm = () => {
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
     setSelectedFile(null);
     setPreviewUrl('');
     setMediaType('image');
     setDuration(0);
     setCaption('');
     setTransform({ scale: 1, x: 0, y: 0 });
+    setCameraMode('none');
     setError('');
     setUploading(false);
   };
@@ -34,6 +46,7 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
     onClose();
   };
 
+  // Device file picker selection
   const handleFileChange = (e) => {
     setError('');
     const file = e.target.files?.[0];
@@ -64,7 +77,6 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
       const videoEl = document.createElement('video');
       videoEl.preload = 'metadata';
       videoEl.onloadedmetadata = () => {
-        URL.revokeObjectURL(videoEl.src);
         if (videoEl.duration > 30.5) {
           setError('Videos must be 30 seconds or shorter.');
           setSelectedFile(null);
@@ -77,6 +89,19 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
     } else {
       setDuration(0);
     }
+  };
+
+  // Callback from CameraCapture component (photo or recorded video)
+  const handleCapturedMedia = (file, type, capturedDuration = 0) => {
+    setError('');
+    setSelectedFile(file);
+    setMediaType(type);
+    setDuration(capturedDuration);
+    setTransform({ scale: 1, x: 0, y: 0 });
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setCameraMode('none');
   };
 
   const handleSubmit = async (e) => {
@@ -123,26 +148,58 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
           </div>
         )}
 
-        {!previewUrl ? (
-          <div
-            className={styles.mediaSelectArea}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*,video/*"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            <ImageIcon size={36} className="text-primary mx-auto mb-2 opacity-80" />
-            <h4 className="font-bold text-text text-sm">Choose Photo or Video</h4>
-            <p className="text-xs text-muted mt-1">
-              Photos & videos stay visible for 24 hours.<br />
-              Videos must be 30 seconds or shorter.
-            </p>
+        {/* Hidden Device File Input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*,video/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
+        {/* Live Camera Viewfinder (Photo Capture / Video Recorder) */}
+        {cameraMode !== 'none' ? (
+          <CameraCapture
+            mode={cameraMode}
+            onCapture={handleCapturedMedia}
+            onCancel={() => setCameraMode('none')}
+          />
+        ) : !previewUrl ? (
+          /* Three Media Source Selection Options */
+          <div className={styles.mediaSourceGrid}>
+            <div
+              className={styles.mediaOptionMain}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <ImageIcon size={36} className="text-primary mb-1.5 opacity-90" />
+              <h4 className="font-bold text-text text-sm">Choose from device</h4>
+              <p className="text-xs text-muted mt-0.5 m-0">
+                Upload a photo or video from your library
+              </p>
+            </div>
+
+            <div className={styles.mediaOptionRow}>
+              <button
+                type="button"
+                className={styles.mediaOptionCard}
+                onClick={() => setCameraMode('photo')}
+              >
+                <CameraIcon size={24} className="text-primary" />
+                <span>Take photo</span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.mediaOptionCard}
+                onClick={() => setCameraMode('video')}
+              >
+                <VideoIcon size={24} className="text-primary" />
+                <span>Record video (30s)</span>
+              </button>
+            </div>
           </div>
         ) : (
+          /* Live Media Position & Zoom Editor */
           <div className="relative">
             <MediaPositionEditor
               mediaUrl={previewUrl}
@@ -153,6 +210,9 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
             <button
               type="button"
               onClick={() => {
+                if (previewUrl && previewUrl.startsWith('blob:')) {
+                  URL.revokeObjectURL(previewUrl);
+                }
                 setSelectedFile(null);
                 setPreviewUrl('');
                 setTransform({ scale: 1, x: 0, y: 0 });
@@ -165,28 +225,33 @@ const MomentCreatorModal = ({ isOpen, onClose, onCreate, loading: parentLoading 
           </div>
         )}
 
-        <Input
-          label="Caption (Optional)"
-          placeholder="Add a sweet note..."
-          value={caption}
-          onChange={(e) => setCaption(e.target.value)}
-          maxLength={500}
-        />
+        {/* Caption & Actions (Displayed when not in live camera capture mode) */}
+        {cameraMode === 'none' && (
+          <>
+            <Input
+              label="Caption (Optional)"
+              placeholder="Add a sweet note..."
+              value={caption}
+              onChange={(e) => setCaption(e.target.value)}
+              maxLength={500}
+            />
 
-        <div className="flex items-center justify-end gap-3 pt-2.5 border-t border-border">
-          <Button variant="ghost" onClick={handleClose} disabled={uploading || parentLoading}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            loading={uploading || parentLoading}
-            disabled={!selectedFile}
-          >
-            <PlusIcon size={16} />
-            <span>Share Moment</span>
-          </Button>
-        </div>
+            <div className="flex items-center justify-end gap-3 pt-2.5 border-t border-border">
+              <Button variant="ghost" onClick={handleClose} disabled={uploading || parentLoading}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="primary"
+                loading={uploading || parentLoading}
+                disabled={!selectedFile}
+              >
+                <PlusIcon size={16} />
+                <span>Share Moment</span>
+              </Button>
+            </div>
+          </>
+        )}
       </form>
     </Modal>
   );

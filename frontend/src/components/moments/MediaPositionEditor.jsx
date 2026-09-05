@@ -202,9 +202,9 @@ const MediaPositionEditor = ({
           controls={false}
           autoPlay={mediaType === 'video'}
         >
-          <div className={styles.editorOverlayBadge}>
+          {/* <div className={styles.editorOverlayBadge}>
             Live Moment Preview
-          </div>
+          </div> */}
         </MomentMediaFrame>
       </div>
 
