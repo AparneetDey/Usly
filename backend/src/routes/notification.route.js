@@ -7,6 +7,8 @@ import {
   markAllAsRead,
   subscribePush,
   unsubscribePush,
+  deleteAllNotifications,
+  deleteNotification,
 } from '../controllers/notification.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
 
@@ -20,6 +22,8 @@ router.get('/', getNotifications);
 router.get('/unread-count', getUnreadCount);
 router.patch('/read-all', markAllAsRead);
 router.patch('/:id/read', markAsRead);
+router.delete('/', deleteAllNotifications);
+router.delete('/:id', deleteNotification);
 
 router.post('/push/subscribe', subscribePush);
 router.delete('/push/subscribe', unsubscribePush);

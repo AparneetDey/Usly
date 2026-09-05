@@ -56,6 +56,22 @@ class NotificationApiService {
     const response = await api.delete('/notifications/push/subscribe', { data: { endpoint } });
     return response.data;
   }
+
+  /**
+   * Delete all notifications for the current user
+   */
+  async deleteAllNotifications() {
+    const response = await api.delete('/notifications');
+    return response.data;
+  }
+
+  /**
+   * Delete a single notification
+   */
+  async deleteNotification(id) {
+    const response = await api.delete(`/notifications/${id}`);
+    return response.data;
+  }
 }
 
 export const notificationApiService = new NotificationApiService();

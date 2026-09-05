@@ -187,3 +187,45 @@ export const unsubscribePush = asyncHandler(async (req, res) => {
     new ApiResponse(200, null, 'Push subscription removed successfully')
   );
 });
+
+/**
+ * @desc    Delete all notifications for current user
+ * @route   DELETE /api/v1/notifications
+ * @access  Private
+ */
+export const deleteAllNotifications = asyncHandler(async (req, res) => {
+  const userId = req.user._id || req.user.id;
+
+  await Notification.deleteMany({ recipient: userId });
+
+  res.status(200).json(
+    new ApiResponse(200, null, 'All notifications deleted successfully')
+  );
+});
+
+/**
+ * @desc    Delete single notification by ID
+ * @route   DELETE /api/v1/notifications/:id
+ * @access  Private
+ */
+export const deleteNotification = asyncHandler(async (req, res) => {
+  const userId = (req.user._id || req.user.id).toString();
+  const { id } = req.params;
+
+  const notification = await Notification.findById(id);
+
+  if (!notification) {
+    throw new ApiError(404, 'Notification not found');
+  }
+
+  // Authorization: Only recipient can delete their notification
+  if (notification.recipient.toString() !== userId) {
+    throw new ApiError(403, 'Unauthorized to delete this notification');
+  }
+
+  await Notification.findByIdAndDelete(id);
+
+  res.status(200).json(
+    new ApiResponse(200, null, 'Notification deleted successfully')
+  );
+});

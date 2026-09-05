@@ -121,6 +121,29 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
+  const deleteAllNotifications = async () => {
+    try {
+      await notificationApiService.deleteAllNotifications();
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('[NotificationContext] deleteAllNotifications error:', error.message);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await notificationApiService.deleteNotification(id);
+      const target = notifications.find((n) => n._id === id);
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+      if (target && !target.isRead) {
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('[NotificationContext] deleteNotification error:', error.message);
+    }
+  };
+
   /**
    * Explicit user-triggered action to request notification permission & subscribe to Web Push
    */
@@ -224,6 +247,8 @@ export const NotificationProvider = ({ children }) => {
         fetchUnreadCount,
         markAsRead,
         markAllAsRead,
+        deleteAllNotifications,
+        deleteNotification,
         requestAndEnablePush,
         disablePush,
       }}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
@@ -24,6 +24,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const bellButtonRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
@@ -87,7 +88,8 @@ const Navbar = () => {
           {/* Notification Bell Button with Unread Badge & Dropdown */}
           <div className="relative">
             <button
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              ref={bellButtonRef}
+              onClick={() => setNotificationsOpen((prev) => !prev)}
               className="p-2 text-muted hover:text-primary transition-colors relative rounded-full hover:bg-surface-alt flex items-center justify-center"
               title="Notifications"
               aria-label="Notifications"
@@ -103,6 +105,7 @@ const Navbar = () => {
             <NotificationCenter
               isOpen={notificationsOpen}
               onClose={() => setNotificationsOpen(false)}
+              bellButtonRef={bellButtonRef}
             />
           </div>
 

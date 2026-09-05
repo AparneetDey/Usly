@@ -58,20 +58,38 @@
   border-radius: 999px;
 }
 
-.markAllBtn {
-  font-size: 12px;
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.actionBtn {
+  font-size: 11px;
   font-weight: 600;
   color: var(--color-primary);
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 4px 6px;
   border-radius: 6px;
-  transition: background-color 0.15s ease;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.markAllBtn:hover {
+.actionBtn:hover {
   background-color: var(--color-surface-alt);
+}
+
+.deleteActionBtn {
+  color: var(--color-text-secondary);
+}
+
+.deleteActionBtn:hover {
+  color: #e11d48;
+  background-color: rgba(225, 29, 72, 0.08);
 }
 
 .tabsBar {
@@ -116,30 +134,73 @@
 }
 
 .item {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
   text-decoration: none;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
   border-bottom: 1px solid rgba(216, 204, 234, 0.4);
 }
 
-.item:hover {
+.unreadItem {
+  background-color: var(--color-surface);
+}
+
+.unreadItem:hover {
   background-color: var(--color-surface-alt);
 }
 
-.unreadItem {
-  background-color: rgba(241, 235, 255, 0.6);
+/* Darker/muted style for read notifications to clearly distinguish from unread */
+.readItem {
+  background-color: #ECE5F7;
+  opacity: 0.88;
+}
+
+.readItem:hover {
+  background-color: #E2D7F3;
+  opacity: 1;
+}
+
+.unreadDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  flex-shrink: 0;
+  margin-top: 6px;
 }
 
 .priorityItem {
-  border-left: 3px solid var(--color-accent);
+  border-left: 4px solid var(--color-accent);
 }
 
 .activityItem {
-  border-left: 3px solid transparent;
+  border-left: 4px solid var(--color-secondary);
+}
+
+.itemDeleteBtn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  margin-left: auto;
+  align-self: flex-start;
+}
+
+.item:hover .itemDeleteBtn {
+  opacity: 1;
+}
+
+.itemDeleteBtn:hover {
+  color: #e11d48;
+  background-color: rgba(225, 29, 72, 0.12);
 }
 
 .actorAvatar {
