@@ -3,12 +3,14 @@
   inset: 0;
   background-color: rgba(36, 19, 47, 0.45);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s ease-out forwards;
+  will-change: opacity;
 }
 
 .modal {
@@ -22,7 +24,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
 }
 
 .header {
@@ -81,11 +84,11 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.98);
+    transform: translate3d(0, 10px, 0) scale(0.98);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 

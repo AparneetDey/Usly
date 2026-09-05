@@ -18,7 +18,9 @@ const CalendarHeader = ({
   onYearChange,
   onAddEvent,
 }) => {
-  const years = Array.from({ length: 15 }, (_, i) => currentYear - 5 + i);
+  const startYear = 2000;
+  const endYear = Math.max(2050, currentYear + 10);
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, i) => startYear + i);
 
   return (
     <div className={styles.headerContainer}>

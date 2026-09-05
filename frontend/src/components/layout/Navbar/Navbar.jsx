@@ -98,7 +98,7 @@ const Navbar = () => {
           </Button>
 
           <button
-            className={styles.mobileMenuBtn}
+            className={`${styles.mobileMenuBtn} ${mobileOpen ? styles.mobileMenuBtnActive : ''}`}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle navigation menu"
           >
