@@ -10,6 +10,7 @@ import styles from './Login.module.css';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -78,7 +79,22 @@ const Login = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            showPasswordToggle
+            isPasswordVisible={showPassword}
+            onTogglePassword={setShowPassword}
           />
+
+          <div className={styles.optionsRow}>
+            <label className={styles.showPasswordOption}>
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={(e) => setShowPassword(e.target.checked)}
+                className={styles.checkbox}
+              />
+              <span>Show password</span>
+            </label>
+          </div>
 
           <Button type="submit" variant="primary" fullWidth loading={submitting}>
             <span>Log In</span>
