@@ -1,6 +1,9 @@
 import Notification from '../models/notification.model.js';
 import User from '../models/user.model.js';
 import pushService from './push.service.js';
+import { ApiError } from '../utils/index.js';
+
+export const MISS_YOU_COOLDOWN_MS = 15 * 60 * 1000; // 15 minutes cooldown
 
 class NotificationService {
   /**
@@ -376,6 +379,107 @@ class NotificationService {
    */
   async createUslyUpdateNotification(params) {
     return this.createInformativeNotification(params);
+  }
+
+  /**
+   * Priority: "I Miss You" emotional ping
+   * (In-App: YES, Push: YES, Email: NO)
+   */
+  async notifyMissYou(senderId) {
+    const sender = await User.findById(senderId).select('name avatar');
+    if (!sender) {
+      throw new ApiError(404, 'Sender user not found');
+    }
+
+    const recipientId = await this.getPartnerId(senderId);
+    if (!recipientId) {
+      throw new ApiError(400, 'You must be connected with a partner in Usly to send an "I miss you".');
+    }
+
+    // Server-side cooldown check
+    const lastMissYou = await Notification.findOne({
+      actor: senderId,
+      recipient: recipientId,
+      type: 'I_MISS_YOU',
+    }).sort({ createdAt: -1 });
+
+    if (lastMissYou) {
+      const elapsed = Date.now() - new Date(lastMissYou.createdAt).getTime();
+      if (elapsed < MISS_YOU_COOLDOWN_MS) {
+        const remainingSeconds = Math.ceil((MISS_YOU_COOLDOWN_MS - elapsed) / 1000);
+        const remainingMinutes = Math.ceil(remainingSeconds / 60);
+        throw new ApiError(
+          429,
+          `You already sent an "I miss you" recently. You can send another in ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''}.`
+        );
+      }
+    }
+
+    const senderName = sender.name || 'Your partner';
+
+    const notification = await this.createNotification({
+      recipient: recipientId,
+      actor: senderId,
+      type: 'I_MISS_YOU',
+      importance: 'priority',
+      title: `${senderName} misses you 💜`,
+      message: `They just sent you an "I miss you."`,
+      entityType: null,
+      entityId: null,
+      sendPush: true,
+      url: '/',
+    });
+
+    return {
+      notification,
+      cooldownSeconds: Math.ceil(MISS_YOU_COOLDOWN_MS / 1000),
+      cooldownEndsAt: new Date(Date.now() + MISS_YOU_COOLDOWN_MS).toISOString(),
+    };
+  }
+
+  /**
+   * Check "I Miss You" cooldown status for current user
+   */
+  async getMissYouStatus(senderId) {
+    const recipientId = await this.getPartnerId(senderId);
+    if (!recipientId) {
+      return {
+        canSend: false,
+        remainingSeconds: 0,
+        reason: 'No partner connected',
+      };
+    }
+
+    const lastMissYou = await Notification.findOne({
+      actor: senderId,
+      recipient: recipientId,
+      type: 'I_MISS_YOU',
+    }).sort({ createdAt: -1 });
+
+    if (!lastMissYou) {
+      return {
+        canSend: true,
+        remainingSeconds: 0,
+        lastSentAt: null,
+      };
+    }
+
+    const elapsed = Date.now() - new Date(lastMissYou.createdAt).getTime();
+    if (elapsed < MISS_YOU_COOLDOWN_MS) {
+      const remainingSeconds = Math.ceil((MISS_YOU_COOLDOWN_MS - elapsed) / 1000);
+      return {
+        canSend: false,
+        remainingSeconds,
+        lastSentAt: lastMissYou.createdAt,
+        cooldownEndsAt: new Date(new Date(lastMissYou.createdAt).getTime() + MISS_YOU_COOLDOWN_MS).toISOString(),
+      };
+    }
+
+    return {
+      canSend: true,
+      remainingSeconds: 0,
+      lastSentAt: lastMissYou.createdAt,
+    };
   }
 }
 

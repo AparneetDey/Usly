@@ -1,6 +1,7 @@
 import Notification from '../models/notification.model.js';
 import Moment from '../models/moment.model.js';
 import pushService from '../services/push.service.js';
+import notificationService from '../services/notification.service.js';
 import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js';
 
 /**
@@ -227,5 +228,34 @@ export const deleteNotification = asyncHandler(async (req, res) => {
 
   res.status(200).json(
     new ApiResponse(200, null, 'Notification deleted successfully')
+  );
+});
+
+/**
+ * @desc    Send "I Miss You" Priority notification to partner
+ * @route   POST /api/v1/notifications/miss-you
+ * @access  Private
+ */
+export const sendMissYou = asyncHandler(async (req, res) => {
+  const senderId = req.user._id || req.user.id;
+  // Security: Recipient is derived entirely from authenticated user's relationship
+  const result = await notificationService.notifyMissYou(senderId);
+
+  res.status(200).json(
+    new ApiResponse(200, result, 'Sent "I miss you" notification successfully')
+  );
+});
+
+/**
+ * @desc    Get "I Miss You" cooldown and availability status
+ * @route   GET /api/v1/notifications/miss-you/status
+ * @access  Private
+ */
+export const getMissYouStatus = asyncHandler(async (req, res) => {
+  const senderId = req.user._id || req.user.id;
+  const status = await notificationService.getMissYouStatus(senderId);
+
+  res.status(200).json(
+    new ApiResponse(200, status, 'Retrieved "I miss you" status')
   );
 });

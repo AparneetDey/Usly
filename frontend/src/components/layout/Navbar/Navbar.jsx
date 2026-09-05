@@ -99,7 +99,7 @@ const Navbar = () => {
             >
               <BellIcon size={20} />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-accent text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-2 border-surface shadow-sm animate-pulse">
+                <span className="absolute -top-0.5 -right-0.5 bg-accent text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-2 border-surface shadow-sm">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

@@ -10,6 +10,7 @@ export const NOTIFICATION_TYPES = [
   'MOMENT_COMMENT',
   'CHAT_MESSAGE',
   'USLY_UPDATE',
+  'I_MISS_YOU',
 ];
 
 export const NOTIFICATION_IMPORTANCE = ['priority', 'informative', 'activity'];

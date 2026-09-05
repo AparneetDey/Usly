@@ -18,6 +18,7 @@ import Card from '../../components/ui/Card/Card.jsx';
 import Badge from '../../components/ui/Badge/Badge.jsx';
 import { SummaryCardSkeleton } from '../../components/ui/Skeleton/index.js';
 import MomentsSection from '../../components/moments/MomentsSection.jsx';
+import MissYouSection from '../../components/home/MissYouSection/MissYouSection.jsx';
 import eventService from '../../services/event.service.js';
 import letterService from '../../services/letter.service.js';
 import complaintService from '../../services/complaint.service.js';
@@ -118,6 +119,9 @@ const Home = () => {
 
       {/* 24-Hour Moments Feature Section */}
       <MomentsSection />
+
+      {/* "I Miss You" Emotional Interaction */}
+      <MissYouSection partner={partner} />
 
       {/* Summary Cards Grid */}
       <div className={styles.grid}>

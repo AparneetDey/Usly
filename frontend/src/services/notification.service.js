@@ -76,6 +76,22 @@ class NotificationApiService {
     const response = await api.delete(`/notifications/${id}`);
     return response.data;
   }
+
+  /**
+   * Send "I Miss You" Priority notification to partner
+   */
+  async sendMissYou() {
+    const response = await api.post('/notifications/miss-you');
+    return response.data || response;
+  }
+
+  /**
+   * Get "I Miss You" cooldown and availability status
+   */
+  async getMissYouStatus() {
+    const response = await api.get('/notifications/miss-you/status');
+    return response.data || response;
+  }
 }
 
 export const notificationApiService = new NotificationApiService();
