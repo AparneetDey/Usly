@@ -6,8 +6,10 @@ import {
   ImageIcon,
   TrashIcon,
   CheckIcon,
+  BellIcon,
 } from '../../components/icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useNotifications } from '../../context/NotificationContext.jsx';
 import PageContainer from '../../components/layout/PageContainer/PageContainer.jsx';
 import Input from '../../components/ui/Input/Input.jsx';
 import Button from '../../components/ui/Button/Button.jsx';
@@ -19,12 +21,20 @@ import styles from './Settings.module.css';
 
 const Settings = () => {
   const { user, updateUser, loading: authLoading } = useAuth();
+  const {
+    pushSupported,
+    pushPermission,
+    pushSubscribed,
+    requestAndEnablePush,
+    disablePush,
+  } = useNotifications();
   const fileInputRef = useRef(null);
 
   // Profile section state
   const [name, setName] = useState(user?.name || '');
   const [updatingProfile, setUpdatingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [togglingPush, setTogglingPush] = useState(false);
 
   // Sync state when user loads
   useEffect(() => {
@@ -32,6 +42,24 @@ const Settings = () => {
       setName(user.name);
     }
   }, [user]);
+
+  // Push notification toggle handler
+  const handleTogglePush = async () => {
+    setTogglingPush(true);
+    try {
+      if (pushSubscribed) {
+        await disablePush();
+        showToast('Web Push notifications disabled for this device.');
+      } else {
+        await requestAndEnablePush();
+        showToast('Web Push notifications enabled successfully! 🔔');
+      }
+    } catch (err) {
+      showToast(err.message || 'Failed to update push notification settings', 'error');
+    } finally {
+      setTogglingPush(false);
+    }
+  };
 
   // Email change section state
   const [newEmail, setNewEmail] = useState('');
@@ -386,6 +414,57 @@ const Settings = () => {
               </Button>
             </div>
           </form>
+        </div>
+
+        {/* SECTION 4: WEB PUSH NOTIFICATIONS */}
+        <div className={styles.sectionCard}>
+          <div className={styles.sectionHeader}>
+            <BellIcon size={20} className="text-primary" />
+            <h2 className={styles.sectionTitle}>Push Notifications</h2>
+          </div>
+
+          <div className="space-y-3 py-1">
+            <p className={styles.helpText}>
+              Stay updated with important actions like new letters, filed complaints, and event reminders even when Usly isn't open.
+            </p>
+
+            {pushPermission === 'denied' ? (
+              <div className="p-3 bg-accent/10 border border-accent/30 rounded-lg text-xs text-text-secondary">
+                ⚠️ Browser notification permission is currently <strong>denied</strong>. To receive alerts, please allow notification permissions for this website in your browser settings.
+              </div>
+            ) : pushSubscribed ? (
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 bg-surface-alt rounded-lg border border-border">
+                <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+                  <CheckIcon size={16} />
+                  <span>Web Push notifications are active on this device.</span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleTogglePush}
+                  loading={togglingPush}
+                >
+                  Disable Push
+                </Button>
+              </div>
+            ) : (
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 bg-surface-alt rounded-lg border border-border">
+                <span className="text-xs text-text-secondary">
+                  Push notifications are currently disabled on this device.
+                </span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleTogglePush}
+                  loading={togglingPush}
+                  disabled={!pushSupported}
+                >
+                  <BellIcon size={14} />
+                  <span>Enable Push Notifications</span>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

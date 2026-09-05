@@ -10,6 +10,7 @@ import letterRoutes from './routes/letter.route.js';
 import complaintRoutes from './routes/complaint.route.js';
 import imagekitRoutes from './routes/imagekit.route.js';
 import momentRoutes from './routes/moment.route.js';
+import notificationRoutes from './routes/notification.route.js';
 
 import { notFoundHandler, errorHandler } from './middlewares/error.middleware.js';
 
@@ -65,9 +66,11 @@ app.use('/api/v1/letters', letterRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/imagekit', imagekitRoutes);
 app.use('/api/v1/moments', momentRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
-// Duplicate route alias without /v1 prefix for direct /api/moments requests
+// Duplicate route alias without /v1 prefix for direct requests
 app.use('/api/moments', momentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error Handling Middleware Foundation
 app.use(notFoundHandler);

@@ -1,0 +1,23 @@
+{
+  "name": "Usly - Letters That Connect",
+  "short_name": "Usly",
+  "description": "A shared private space for couples to stay connected.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F7F3FF",
+  "theme_color": "#6D28D9",
+  "icons": [
+    {
+      "src": "/fav-icon.png",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/usly-logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

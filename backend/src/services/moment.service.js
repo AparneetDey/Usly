@@ -1,5 +1,6 @@
 import Moment from '../models/moment.model.js';
 import imageKitService from './imagekit.service.js';
+import notificationService from './notification.service.js';
 
 class MomentService {
   /**
@@ -127,6 +128,13 @@ class MomentService {
 
     await moment.save();
 
+    // Trigger Activity notification for moment reaction
+    notificationService
+      .notifyMomentReaction({ moment, reactorId: userId, emoji: reactionEmoji })
+      .catch((err) => {
+        console.error('[addOrUpdateReaction] Background notification error:', err.message);
+      });
+
     return await Moment.findById(moment._id)
       .populate('createdBy', 'name avatar')
       .populate('reactions.userId', 'name avatar')
@@ -178,6 +186,13 @@ class MomentService {
     });
 
     await moment.save();
+
+    // Trigger Activity notification for moment comment
+    notificationService
+      .notifyMomentComment({ moment, commenterId: userId, message: message.trim() })
+      .catch((err) => {
+        console.error('[addComment] Background notification error:', err.message);
+      });
 
     return await Moment.findById(moment._id)
       .populate('createdBy', 'name avatar')

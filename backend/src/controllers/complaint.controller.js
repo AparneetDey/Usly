@@ -158,7 +158,7 @@ export const updateComplaint = asyncHandler(async (req, res) => {
   });
 
   const updatedComplaint = await Complaint.findByIdAndUpdate(id, updates, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   })
     .populate('createdBy', 'name email avatar')
@@ -211,6 +211,13 @@ export const addResponse = asyncHandler(async (req, res) => {
   const populatedComplaint = await Complaint.findById(complaint._id)
     .populate('createdBy', 'name email avatar')
     .populate('responses.userId', 'name email avatar');
+
+  // Trigger Activity notification for complaint comment
+  notificationService
+    .notifyComplaintComment(populatedComplaint, currentUserId, message.trim())
+    .catch((err) => {
+      console.error('[addResponse] Background notification error:', err.message);
+    });
 
   res.status(201).json(
     new ApiResponse(

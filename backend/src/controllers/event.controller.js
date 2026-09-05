@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Event from '../models/event.model.js';
+import notificationService from '../services/notification.service.js';
 import { ApiError, ApiResponse, asyncHandler } from '../utils/index.js';
 import { sendUpcomingEventReminders } from '../services/event-reminder.service.js';
 
@@ -43,6 +44,11 @@ export const createEvent = asyncHandler(async (req, res) => {
     'createdBy',
     'name email avatar'
   );
+
+  // Trigger Activity notification for partner
+  notificationService.notifyEventAdded(populatedEvent).catch((err) => {
+    console.error('[createEvent] Background notification error:', err.message);
+  });
 
   res.status(201).json(
     new ApiResponse(201, populatedEvent, 'Event created successfully')
@@ -153,7 +159,7 @@ export const updateEvent = asyncHandler(async (req, res) => {
   });
 
   const updatedEvent = await Event.findByIdAndUpdate(id, updates, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   }).populate('createdBy', 'name email avatar');
 

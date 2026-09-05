@@ -75,3 +75,54 @@ textarea.input {
   color: var(--color-highlight);
   font-weight: 600;
 }
+
+.hasTrailingAction {
+  padding-right: 2.75rem !important;
+}
+
+.passwordToggleBtn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color 0.15s ease, background-color 0.15s ease, transform 0.1s ease;
+  padding: 0;
+}
+
+.passwordToggleBtn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-surface-alt);
+}
+
+.passwordToggleBtn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.passwordToggleBtn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+.toggleIcon {
+  display: block;
+}
+
+.rightElementWrapper {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+}
+

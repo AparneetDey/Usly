@@ -3,44 +3,160 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  padding: 2rem;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem;
+  width: 100%;
 }
 
 .fullScreen {
-  min-height: 100vh;
-  width: 100vw;
   position: fixed;
-  top: 0;
-  left: 0;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100dvh;
   background-color: var(--color-background);
   z-index: 9999;
+  overflow: hidden;
 }
 
-.heartPulse {
-  font-size: 2.5rem;
-  animation: pulse 1.2s ease-in-out infinite;
-  display: inline-block;
+.animationWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* One extremely subtle ambient supporting glow behind the logo */
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%) scale(0.92);
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.20) 0%,
+    rgba(236, 72, 153, 0.08) 42%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.35;
+  animation: glowBreathe 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* Core Usly logo with gentle breathing animation */
+.logo {
+  position: relative;
+  height: 44px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  animation: logoBreathe 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@media (min-width: 640px) {
+  .logo {
+    height: 56px;
+    max-width: 240px;
+  }
+
+  .glow {
+    width: 230px;
+    height: 230px;
+  }
+}
+
+/* Subtle, calm message text if provided */
 .message {
-  color: var(--color-text-muted);
-  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
   font-weight: 500;
+  letter-spacing: 0.01em;
   text-align: center;
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.4;
+  opacity: 0.82;
 }
 
-@keyframes pulse {
+/* Screen reader only utility */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Seamless repeating breathing keyframes (0% and 100% strictly match) */
+@keyframes logoBreathe {
   0% {
-    transform: scale(0.95);
-    opacity: 0.8;
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+  20% {
+    opacity: 1;
+    transform: scale(1);
   }
   50% {
-    transform: scale(1.15);
     opacity: 1;
+    transform: scale(1.04);
+  }
+  80% {
+    opacity: 0.75;
+    transform: scale(1);
   }
   100% {
-    transform: scale(0.95);
-    opacity: 0.8;
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes glowBreathe {
+  0% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  20% {
+    opacity: 0.65;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+  80% {
+    opacity: 0.50;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0.35;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+}
+
+/* Accessibility: respect user preferences for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    animation: none;
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .glow {
+    animation: none;
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
@@ -10,15 +10,21 @@ import {
   LogOutIcon,
   MenuIcon,
   CloseIcon,
+  BellIcon,
 } from '../../icons/index.js';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import { useNotifications } from '../../../context/NotificationContext.jsx';
+import NotificationCenter from '../../notifications/NotificationCenter.jsx';
 import Button from '../../ui/Button/Button.jsx';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const bellButtonRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
@@ -79,6 +85,33 @@ const Navbar = () => {
         </nav>
 
         <div className={styles.userMenu}>
+          {/* Notification Bell Button with Unread Badge & Dropdown */}
+          <div className="relative">
+            <button
+              ref={bellButtonRef}
+              onClick={() => {
+                setMobileOpen(false);
+                setNotificationsOpen((prev) => !prev);
+              }}
+              className="p-2 text-muted hover:text-primary transition-colors relative rounded-full hover:bg-surface-alt flex items-center justify-center"
+              title="Notifications"
+              aria-label="Notifications"
+            >
+              <BellIcon size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-accent text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center border-2 border-surface shadow-sm">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
+
+            <NotificationCenter
+              isOpen={notificationsOpen}
+              onClose={() => setNotificationsOpen(false)}
+              bellButtonRef={bellButtonRef}
+            />
+          </div>
+
           {user && (
             <Link to="/settings" className={`${styles.userInfo} hover:opacity-90 transition-opacity`} title="Account Settings">
               <div className={styles.avatar}>
@@ -99,7 +132,10 @@ const Navbar = () => {
 
           <button
             className={`${styles.mobileMenuBtn} ${mobileOpen ? styles.mobileMenuBtnActive : ''}`}
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => {
+              setNotificationsOpen(false);
+              setMobileOpen((prev) => !prev);
+            }}
             aria-label="Toggle navigation menu"
           >
             {mobileOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}

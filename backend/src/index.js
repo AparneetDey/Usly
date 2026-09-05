@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import app from './app.js';
 import { connectDB } from './config/db.config.js';
 import { startMomentCleanupInterval } from './services/moment-cleanup.service.js';
@@ -7,14 +7,10 @@ import {
   stopEventReminderScheduler,
 } from './services/event-reminder.service.js';
 
-// Load environment variables
-dotenv.config();
-
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  
-console.log(process.env.CLIENT_URL);
+
   try {
     // 1. Connect to MongoDB
     console.log('[Server] Connecting to MongoDB...');
