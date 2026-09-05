@@ -270,7 +270,7 @@ export const requestEmailChange = asyncHandler(async (req, res) => {
 
   await user.save();
 
-  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
   const verificationUrl = `${frontendUrl.replace(/\/$/, '')}/verify-email-change?token=${rawToken}`;
 
   const { subject, html, text } = getEmailChangeVerificationTemplate({

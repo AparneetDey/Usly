@@ -20,7 +20,7 @@ class NotificationService {
       }
 
       const recipientName = recipient.name || 'Love';
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
       const eventUrl = `${frontendUrl.replace(/\/$/, '')}/calendar`;
 
       const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
@@ -84,7 +84,7 @@ class NotificationService {
         : await User.findById(senderId);
 
       const senderName = sender?.name || 'Your partner';
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
       const letterUrl = `${frontendUrl.replace(/\/$/, '')}/letters`;
 
       const { subject, html, text } = getNewLetterEmailTemplate({
@@ -128,7 +128,7 @@ class NotificationService {
         return;
       }
 
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173';
+      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
       const complaintUrl = `${frontendUrl.replace(/\/$/, '')}/complaints`;
 
       const { subject, html, text } = getNewComplaintEmailTemplate({
