@@ -13,6 +13,8 @@ dotenv.config();
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
+  
+console.log(process.env.CLIENT_URL);
   try {
     // 1. Connect to MongoDB
     console.log('[Server] Connecting to MongoDB...');

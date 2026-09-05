@@ -18,9 +18,34 @@ const app = express();
 // Security HTTP headers
 app.use(helmet());
 
-// Configure CORS for frontend integration
+// Configure CORS for frontend integration (supports local dev & production URLs)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:3000',
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+  'https://usly-gold.vercel.app',
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CLIENT_URL || 'https://usly-gold.vercel.app',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+
+    // Allow explicitly listed origins, any localhost origin, or development mode
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:') ||
+      process.env.NODE_ENV === 'development'
+    ) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS policy blocked request from origin: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
