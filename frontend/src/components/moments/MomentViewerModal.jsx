@@ -96,22 +96,26 @@ const MomentViewerModal = ({
     }
   }, [currentIndex]);
 
-  // Image Auto-Advance Engine (5-Second Timer)
+  // Image Auto-Advance Engine (5-Second Timer with Side-Effect Free Progress & Pause Resume)
   useEffect(() => {
     if (!isOpen || !currentMoment || currentMoment.media?.type === 'video' || isPaused || isCommentFocused) {
       return;
     }
 
+    let startProgress = progress >= 100 ? 0 : progress;
+    const startTime = Date.now();
+
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        const nextPct = prev + (PROGRESS_STEP_MS / IMAGE_DURATION_MS) * 100;
-        if (nextPct >= 100) {
-          clearInterval(interval);
-          handleNext();
-          return 0;
-        }
-        return nextPct;
-      });
+      const elapsed = Date.now() - startTime;
+      const currentPct = startProgress + (elapsed / IMAGE_DURATION_MS) * 100;
+
+      if (currentPct >= 100) {
+        clearInterval(interval);
+        setProgress(100);
+        handleNext();
+      } else {
+        setProgress(currentPct);
+      }
     }, PROGRESS_STEP_MS);
 
     return () => clearInterval(interval);
