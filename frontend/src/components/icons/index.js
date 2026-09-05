@@ -35,4 +35,5 @@ export { default as CameraIcon } from './CameraIcon.jsx';
 export { default as VideoIcon } from './VideoIcon.jsx';
 export { default as SwitchCameraIcon } from './SwitchCameraIcon.jsx';
 export { default as RotateCcwIcon } from './RotateCcwIcon.jsx';
+export { default as BellIcon } from './BellIcon.jsx';
 export { default as Icon } from './Icon.jsx';

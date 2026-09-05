@@ -212,6 +212,13 @@ export const addResponse = asyncHandler(async (req, res) => {
     .populate('createdBy', 'name email avatar')
     .populate('responses.userId', 'name email avatar');
 
+  // Trigger Activity notification for complaint comment
+  notificationService
+    .notifyComplaintComment(populatedComplaint, currentUserId, message.trim())
+    .catch((err) => {
+      console.error('[addResponse] Background notification error:', err.message);
+    });
+
   res.status(201).json(
     new ApiResponse(
       201,

@@ -61,8 +61,8 @@ export const sendUpcomingEventReminders = async () => {
           continue;
         }
 
-        // Send email reminder to partner
-        console.log(`[Event Reminder] Sending reminder for event "${event.title}" to ${user.email}...`);
+        // Send Priority In-App & Push reminder to partner
+        console.log(`[Event Reminder] Dispatching In-App & Push reminder for event "${event.title}" to user ${user._id}...`);
         const result = await notificationService.notifyEventReminder({
           event,
           recipient: user,
@@ -70,7 +70,7 @@ export const sendUpcomingEventReminders = async () => {
 
         if (result && result.success) {
           totalSent++;
-          console.log(`[Event Reminder] Successfully sent reminder for "${event.title}" to ${user.email}.`);
+          console.log(`[Event Reminder] Successfully dispatched reminder for "${event.title}" to user ${user._id}.`);
 
           // Atomically update event document with this partner's reminder status to prevent duplicates
           await Event.updateOne(
@@ -85,12 +85,12 @@ export const sendUpcomingEventReminders = async () => {
             }
           );
         } else {
-          console.error(`[Event Reminder] Failed to send reminder for "${event.title}" to ${user.email}: ${result?.error || 'Unknown error'}. Will retry on next scheduler run.`);
+          console.error(`[Event Reminder] Failed to dispatch reminder for "${event.title}" to user ${user._id}: ${result?.error || 'Unknown error'}. Will retry on next scheduler run.`);
         }
       }
     }
 
-    console.log(`[Event Reminder] Event reminder sweep completed. Sent ${totalSent} email reminder(s).`);
+    console.log(`[Event Reminder] Event reminder sweep completed. Dispatched ${totalSent} reminder(s).`);
     return { processed: upcomingEvents.length, sent: totalSent };
   } catch (error) {
     console.error('[Event Reminder] Error during event reminder sweep:', error.message);

@@ -1,150 +1,300 @@
+import Notification from '../models/notification.model.js';
 import User from '../models/user.model.js';
-import emailService from './email.service.js';
-import { getNewLetterEmailTemplate } from '../templates/email/new-letter.template.js';
-import { getNewComplaintEmailTemplate } from '../templates/email/new-complaint.template.js';
-import { getEventReminderEmailTemplate } from '../templates/email/event-reminder.template.js';
+import pushService from './push.service.js';
 
 class NotificationService {
   /**
-   * Dispatches an email notification for an upcoming event reminder
-   * @param {Object} params
-   * @param {Object} params.event - Event document
-   * @param {Object} params.recipient - User document (recipient)
-   * @returns {Promise<{success: boolean, error?: string}>}
+   * Core method to create an In-App notification and dispatch Web Push if required
    */
-  async notifyEventReminder({ event, recipient }) {
+  async createNotification({
+    recipient,
+    actor = null,
+    type,
+    importance = 'activity',
+    title,
+    message,
+    entityType = null,
+    entityId = null,
+    sendPush = false,
+    url = '/',
+  }) {
     try {
-      if (!event || !recipient || !recipient.email) {
-        console.warn(`[NotificationService] Cannot send event reminder: Event or recipient email missing.`);
-        return { success: false, error: 'Missing event or recipient email' };
+      // Avoid notifying users about their own actions
+      if (
+        actor &&
+        recipient &&
+        actor.toString() === recipient.toString()
+      ) {
+        return null;
       }
 
-      const recipientName = recipient.name || 'Love';
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
-      const eventUrl = `${frontendUrl.replace(/\/$/, '')}/calendar`;
-
-      const formattedDate = new Date(event.date).toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
+      // 1. Create In-App Notification in MongoDB
+      const notification = await Notification.create({
+        recipient,
+        actor,
+        type,
+        importance,
+        title,
+        message,
+        entityType,
+        entityId,
+        isRead: false,
       });
 
-      const { subject, html, text } = getEventReminderEmailTemplate({
-        recipientName,
-        eventTitle: event.title,
-        eventDate: formattedDate,
-        eventDescription: event.description || '',
-        eventUrl,
-      });
+      const populatedNotification = await Notification.findById(notification._id)
+        .populate('actor', 'name avatar')
+        .lean();
 
-      const result = await emailService.sendEmail({
-        to: recipient.email,
-        subject,
-        html,
-        text,
-      });
+      // 2. Dispatch Web Push if sendPush is true or if notification is priority
+      const shouldPush = sendPush || importance === 'priority';
+      if (shouldPush) {
+        const pushPayload = {
+          title,
+          body: message,
+          icon: '/usly-logo.png',
+          badge: '/usly-logo.png',
+          url,
+          data: {
+            notificationId: notification._id,
+            entityType,
+            entityId,
+            url,
+          },
+        };
 
-      return result;
+        // Fire-and-forget push dispatch (does not block core flow or fail DB record)
+        pushService.sendNotificationToUser(recipient, pushPayload).catch((err) => {
+          console.error('[NotificationService] Push dispatch warning:', err.message);
+        });
+      }
+
+      return populatedNotification;
     } catch (error) {
-      console.error(`[NotificationService] Error dispatching event reminder for event ${event?._id} to ${recipient?.email}:`, error.message);
-      return { success: false, error: error.message };
+      console.error('[NotificationService] Error creating notification:', error.message);
+      return null;
     }
   }
+
   /**
-   * Dispatches an email notification when a letter is delivered to recipient
-   * @param {Object} letter - Populated or raw Letter Mongoose document
+   * Helper: Resolve user's partner ID in Usly's 2-user system
+   */
+  async getPartnerId(userId) {
+    const user = await User.findById(userId);
+    if (user?.partner) return user.partner;
+
+    const partner = await User.findOne({ _id: { $ne: userId } });
+    return partner?._id || null;
+  }
+
+  /**
+   * Priority: Letter Received (In-App: YES, Push: YES, Email: NO)
    */
   async notifyNewLetter(letter) {
     try {
       if (!letter) return;
-
       const now = new Date();
-      // If letter is scheduled for a future date, do NOT notify until delivered
       if (letter.scheduledFor && new Date(letter.scheduledFor) > now) {
-        console.log(`[NotificationService] Letter ${letter._id} is scheduled for future (${letter.scheduledFor}). Notification deferred until delivery.`);
-        return;
+        return; // Deferred until delivery
       }
 
-      // Resolve recipient user details safely from DB
       const recipientId = letter.to?._id || letter.to;
-      const recipient = typeof letter.to === 'object' && letter.to.email
-        ? letter.to
-        : await User.findById(recipientId);
-
-      if (!recipient || !recipient.email) {
-        console.warn(`[NotificationService] Cannot send letter notification: Recipient missing or has no email.`);
-        return;
-      }
-
-      // Resolve sender user details
       const senderId = letter.from?._id || letter.from;
-      const sender = typeof letter.from === 'object' && letter.from.name
-        ? letter.from
-        : await User.findById(senderId);
+      const senderName = letter.from?.name || (await User.findById(senderId))?.name || 'Your partner';
 
-      const senderName = sender?.name || 'Your partner';
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
-      const letterUrl = `${frontendUrl.replace(/\/$/, '')}/letters`;
-
-      const { subject, html, text } = getNewLetterEmailTemplate({
-        senderName,
-        letterTitle: letter.title,
-        letterUrl,
-      });
-
-      await emailService.sendEmail({
-        to: recipient.email,
-        subject,
-        html,
-        text,
+      await this.createNotification({
+        recipient: recipientId,
+        actor: senderId,
+        type: 'LETTER_RECEIVED',
+        importance: 'priority',
+        title: '💌 New Letter',
+        message: `You received a new letter from ${senderName}.`,
+        entityType: 'Letter',
+        entityId: letter._id,
+        sendPush: true,
+        url: '/letters',
       });
     } catch (error) {
-      console.error('[NotificationService] Error dispatching letter notification:', error.message);
+      console.error('[NotificationService] notifyNewLetter error:', error.message);
     }
   }
 
   /**
-   * Dispatches an email notification when a complaint is created
-   * @param {Object} complaint - Populated or raw Complaint Mongoose document
+   * Priority: Complaint Filed (In-App: YES, Push: YES, Email: NO)
    */
   async notifyNewComplaint(complaint) {
     try {
       if (!complaint) return;
-
-      // Resolve creator user details
       const creatorId = complaint.createdBy?._id || complaint.createdBy;
-      const creator = typeof complaint.createdBy === 'object' && complaint.createdBy.name
-        ? complaint.createdBy
-        : await User.findById(creatorId);
+      const creatorName = complaint.createdBy?.name || (await User.findById(creatorId))?.name || 'Your partner';
+      const recipientId = await this.getPartnerId(creatorId);
 
-      const creatorName = creator?.name || 'Your partner';
+      if (!recipientId) return;
 
-      // Determine recipient: the other partner in Usly's 2-user system
-      const recipientPartner = await User.findOne({ _id: { $ne: creatorId } });
-
-      if (!recipientPartner || !recipientPartner.email) {
-        console.warn(`[NotificationService] Cannot send complaint notification: Partner user missing or has no email.`);
-        return;
-      }
-
-      const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL || 'https://usly-gold.vercel.app';
-      const complaintUrl = `${frontendUrl.replace(/\/$/, '')}/complaints`;
-
-      const { subject, html, text } = getNewComplaintEmailTemplate({
-        creatorName,
-        complaintTitle: complaint.title,
-        complaintUrl,
-      });
-
-      await emailService.sendEmail({
-        to: recipientPartner.email,
-        subject,
-        html,
-        text,
+      await this.createNotification({
+        recipient: recipientId,
+        actor: creatorId,
+        type: 'COMPLAINT_FILED',
+        importance: 'priority',
+        title: 'Important',
+        message: `${creatorName} filed a complaint.`,
+        entityType: 'Complaint',
+        entityId: complaint._id,
+        sendPush: true,
+        url: '/complaints',
       });
     } catch (error) {
-      console.error('[NotificationService] Error dispatching complaint notification:', error.message);
+      console.error('[NotificationService] notifyNewComplaint error:', error.message);
+    }
+  }
+
+  /**
+   * Priority: Event Reminder (In-App: YES, Push: YES, Email: NO)
+   */
+  async notifyEventReminder({ event, recipient }) {
+    try {
+      if (!event || !recipient) return { success: false, error: 'Missing parameters' };
+      const recipientId = recipient._id || recipient;
+
+      await this.createNotification({
+        recipient: recipientId,
+        actor: null,
+        type: 'EVENT_REMINDER',
+        importance: 'priority',
+        title: '📅 Event Tomorrow',
+        message: `Your ${event.title} is tomorrow.`,
+        entityType: 'Event',
+        entityId: event._id,
+        sendPush: true,
+        url: '/calendar',
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('[NotificationService] notifyEventReminder error:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Activity: Partner Added Event (In-App: YES, Push: NO, Email: NO)
+   */
+  async notifyEventAdded(event) {
+    try {
+      if (!event) return;
+      const creatorId = event.createdBy?._id || event.createdBy;
+      const creatorName = event.createdBy?.name || (await User.findById(creatorId))?.name || 'Your partner';
+      const recipientId = await this.getPartnerId(creatorId);
+
+      if (!recipientId) return;
+
+      await this.createNotification({
+        recipient: recipientId,
+        actor: creatorId,
+        type: 'EVENT_ADDED',
+        importance: 'activity',
+        title: 'Event Added',
+        message: `${creatorName} added a new event: "${event.title}"`,
+        entityType: 'Event',
+        entityId: event._id,
+        sendPush: false,
+        url: '/calendar',
+      });
+    } catch (error) {
+      console.error('[NotificationService] notifyEventAdded error:', error.message);
+    }
+  }
+
+  /**
+   * Activity: Complaint Comment/Response (In-App: YES, Push: NO, Email: NO)
+   */
+  async notifyComplaintComment(complaint, responderId, responseMessage) {
+    try {
+      if (!complaint) return;
+      const creatorId = complaint.createdBy?._id || complaint.createdBy;
+      const responder = await User.findById(responderId);
+      const responderName = responder?.name || 'Your partner';
+
+      // Send to the other user involved in the complaint
+      const recipientId =
+        responderId.toString() === creatorId.toString()
+          ? await this.getPartnerId(creatorId)
+          : creatorId;
+
+      if (!recipientId) return;
+
+      await this.createNotification({
+        recipient: recipientId,
+        actor: responderId,
+        type: 'COMPLAINT_COMMENTED',
+        importance: 'activity',
+        title: 'Complaint Comment',
+        message: `${responderName} commented on "${complaint.title}"`,
+        entityType: 'Complaint',
+        entityId: complaint._id,
+        sendPush: false,
+        url: '/complaints',
+      });
+    } catch (error) {
+      console.error('[NotificationService] notifyComplaintComment error:', error.message);
+    }
+  }
+
+  /**
+   * Activity: Moment Reaction (In-App: YES, Push: NO, Email: NO)
+   */
+  async notifyMomentReaction({ moment, reactorId, emoji }) {
+    try {
+      if (!moment) return;
+      const creatorId = moment.createdBy?._id || moment.createdBy;
+      if (reactorId.toString() === creatorId.toString()) return; // Don't notify self
+
+      const reactor = await User.findById(reactorId);
+      const reactorName = reactor?.name || 'Your partner';
+
+      await this.createNotification({
+        recipient: creatorId,
+        actor: reactorId,
+        type: 'MOMENT_REACTION',
+        importance: 'activity',
+        title: 'Moment Reaction',
+        message: `${reactorName} reacted ${emoji} to your Moment.`,
+        entityType: 'Moment',
+        entityId: moment._id,
+        sendPush: false,
+        url: '/',
+      });
+    } catch (error) {
+      console.error('[NotificationService] notifyMomentReaction error:', error.message);
+    }
+  }
+
+  /**
+   * Activity: Moment Comment (In-App: YES, Push: NO, Email: NO)
+   */
+  async notifyMomentComment({ moment, commenterId, message }) {
+    try {
+      if (!moment) return;
+      const creatorId = moment.createdBy?._id || moment.createdBy;
+      if (commenterId.toString() === creatorId.toString()) return; // Don't notify self
+
+      const commenter = await User.findById(commenterId);
+      const commenterName = commenter?.name || 'Your partner';
+      const snippet = message.length > 30 ? `${message.substring(0, 30)}...` : message;
+
+      await this.createNotification({
+        recipient: creatorId,
+        actor: commenterId,
+        type: 'MOMENT_COMMENT',
+        importance: 'activity',
+        title: 'Moment Comment',
+        message: `${commenterName} commented: "${snippet}"`,
+        entityType: 'Moment',
+        entityId: moment._id,
+        sendPush: false,
+        url: '/',
+      });
+    } catch (error) {
+      console.error('[NotificationService] notifyMomentComment error:', error.message);
     }
   }
 }

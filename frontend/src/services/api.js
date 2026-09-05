@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL}/api/v1` || 'https://usly-gold.vercel.app/api/v1';
+const rawBaseUrl = import.meta.env.VITE_API_BASE_URL;
+let API_BASE_URL = '/api/v1';
+
+if (rawBaseUrl && rawBaseUrl !== 'undefined') {
+  const cleanBase = rawBaseUrl.replace(/\/$/, '');
+  API_BASE_URL = cleanBase.endsWith('/api/v1') ? cleanBase : `${cleanBase}/api/v1`;
+}
 
 const api = axios.create({
   baseURL: API_BASE_URL,

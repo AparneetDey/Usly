@@ -1,0 +1,62 @@
+import api from './api.js';
+
+class NotificationApiService {
+  /**
+   * Fetch notification feed (supports optional importance filter)
+   */
+  async getNotifications(params = {}) {
+    const response = await api.get('/notifications', { params });
+    return response.data || [];
+  }
+
+  /**
+   * Fetch unread notification count
+   */
+  async getUnreadCount() {
+    const response = await api.get('/notifications/unread-count');
+    return response.data?.unreadCount || 0;
+  }
+
+  /**
+   * Mark single notification as read
+   */
+  async markAsRead(id) {
+    const response = await api.patch(`/notifications/${id}/read`);
+    return response.data;
+  }
+
+  /**
+   * Mark all unread notifications as read
+   */
+  async markAllAsRead() {
+    const response = await api.patch('/notifications/read-all');
+    return response.data;
+  }
+
+  /**
+   * Get backend public VAPID key for Web Push registration
+   */
+  async getVapidPublicKey() {
+    const response = await api.get('/notifications/vapid-key');
+    return response.data?.publicKey || '';
+  }
+
+  /**
+   * Register push subscription with backend
+   */
+  async subscribePush(subscription) {
+    const response = await api.post('/notifications/push/subscribe', { subscription });
+    return response.data;
+  }
+
+  /**
+   * Remove push subscription from backend
+   */
+  async unsubscribePush(endpoint) {
+    const response = await api.delete('/notifications/push/subscribe', { data: { endpoint } });
+    return response.data;
+  }
+}
+
+export const notificationApiService = new NotificationApiService();
+export default notificationApiService;
