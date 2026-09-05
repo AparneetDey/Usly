@@ -1,81 +1,81 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 class EmailService {
   constructor() {
-    this.transporter = null;
+    this.resend = null;
   }
 
   /**
-   * Initializes Nodemailer transporter if valid SMTP configuration is provided
+   * Initializes Resend client if valid API key is provided
+   * @returns {Resend|null}
    */
-  getTransporter() {
-    if (!this.transporter) {
-      const host = process.env.SMTP_HOST;
-      const port = parseInt(process.env.SMTP_PORT || '587', 10);
-      const secure = process.env.SMTP_SECURE === 'true';
-      const user = process.env.SMTP_USER;
-      const pass = process.env.SMTP_PASSWORD;
+  getResendClient() {
+    if (!this.resend) {
+      const apiKey = process.env.RESEND_API_KEY;
 
-      // Check if SMTP credentials exist and are not default placeholder strings
       const isPlaceholder =
-        !user ||
-        !pass ||
-        user === 'your_email@gmail.com' ||
-        pass === 'your_app_password';
+        !apiKey ||
+        apiKey === 'your_resend_api_key' ||
+        apiKey === 're_123456789';
 
-      if (!host || isPlaceholder) {
+      if (isPlaceholder) {
         console.warn(
-          '⚠️ SMTP credentials missing or using placeholders in .env. Real email notifications will be skipped.'
+          '⚠️ RESEND_API_KEY is missing or using placeholder in environment variables. Real email notifications will be skipped.'
         );
         return null;
       }
 
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure,
-        auth: {
-          user,
-          pass,
-        },
-      });
+      this.resend = new Resend(apiKey);
     }
 
-    return this.transporter;
+    return this.resend;
   }
 
   /**
-   * Sends an email via Nodemailer
+   * Sends an email via Resend HTTP API
    * @param {Object} options
-   * @param {string} options.to - Recipient email address
+   * @param {string|string[]} options.to - Recipient email address or list of addresses
    * @param {string} options.subject - Email subject line
    * @param {string} options.html - HTML email content
-   * @param {string} options.text - Plain text email content
+   * @param {string} [options.text] - Plain text email content
    * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
    */
   async sendEmail({ to, subject, html, text }) {
     try {
-      const transporter = this.getTransporter();
+      const resendClient = this.getResendClient();
 
-      if (!transporter) {
-        console.warn(`[EmailService] Skipping email to ${to}: SMTP not configured in .env.`);
-        return { success: false, error: 'SMTP not configured' };
+      if (!resendClient) {
+        console.warn(`[EmailService] Skipping email to ${to}: RESEND_API_KEY not configured.`);
+        return { success: false, error: 'RESEND_API_KEY not configured' };
       }
 
-      const from = process.env.EMAIL_FROM || '"Usly" <noreply@usly.app>';
+      const from = process.env.EMAIL_FROM || 'Usly <onboarding@resend.dev>';
 
-      const info = await transporter.sendMail({
+      console.log(`[EmailService] Dispatching email to ${to} via Resend HTTP API...`);
+
+      const payload = {
         from,
         to,
         subject,
         html,
-        text,
-      });
+      };
 
-      console.log(`[EmailService] Email sent successfully to ${to}. MessageId: ${info.messageId}`);
-      return { success: true, messageId: info.messageId };
+      if (text) {
+        payload.text = text;
+      }
+
+      const { data, error } = await resendClient.emails.send(payload);
+
+      if (error) {
+        console.error(`[EmailService] Failed to send email to ${to} via Resend:`, error.message || error);
+        return { success: false, error: error.message || 'Resend email delivery failed' };
+      }
+
+      const messageId = data?.id || 'resend-ok';
+      console.log(`[EmailService] Email sent successfully to ${to} via Resend. MessageId: ${messageId}`);
+      return { success: true, messageId };
     } catch (error) {
-      // Safe error logging without exposing SMTP credentials
+      // Safe error logging without exposing API key
       console.error(`[EmailService] Failed to send email to ${to}:`, error.message);
       return { success: false, error: error.message };
     }
