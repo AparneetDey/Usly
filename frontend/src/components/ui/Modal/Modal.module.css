@@ -91,13 +91,15 @@
 
 @media (max-width: 640px) {
   .backdrop {
-    padding: 0.5rem;
-    align-items: flex-end;
+    padding: 0.75rem;
+    align-items: center;
+    justify-content: center;
   }
 
   .modal {
-    max-height: min(92vh, 760px);
-    border-radius: 1.25rem 1.25rem 0.75rem 0.75rem;
+    max-height: min(90vh, 760px);
+    border-radius: 1.25rem;
+    margin: auto;
   }
 
   .header {

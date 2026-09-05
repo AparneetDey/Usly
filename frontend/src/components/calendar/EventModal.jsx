@@ -75,7 +75,7 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
       onClose={onClose}
       title={eventToEdit ? 'Edit Special Day' : 'Add Special Day'}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4.5">
         <Input
           label="Event Title"
           placeholder="Our Anniversary, Coffee Date..."
@@ -84,22 +84,24 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
           required
         />
 
-        <Select
-          label="Category"
-          options={EVENT_TYPES}
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <Select
+            label="Category"
+            options={EVENT_TYPES}
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          />
 
-        <Input
-          label="Date"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          required
-        />
+          <Input
+            label="Date"
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
+        </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <Input
             label="Start Time (Optional)"
             type="time"
@@ -117,12 +119,13 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
         <Input
           label="Description (Optional)"
           type="textarea"
+          rows={2}
           placeholder="Details about where we're going or what we're planning..."
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex items-center gap-2">
           <input
             type="checkbox"
             id="isRecurring"
@@ -135,7 +138,7 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
             }}
             className="w-4 h-4 accent-primary cursor-pointer"
           />
-          <label htmlFor="isRecurring" className="text-sm font-semibold text-text cursor-pointer">
+          <label htmlFor="isRecurring" className="text-xs sm:text-sm font-semibold text-text cursor-pointer">
             Recurring Event
           </label>
         </div>
@@ -149,7 +152,7 @@ const EventModal = ({ isOpen, onClose, onSave, eventToEdit, loading }) => {
           />
         )}
 
-        <div className="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-border">
+        <div className="flex items-center justify-end gap-2.5 pt-3 mt-1 border-t border-border">
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
