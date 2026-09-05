@@ -300,7 +300,7 @@ const MomentViewerModal = ({
 
         {/* Shared MomentMediaFrame with Touch/Mouse Hold to Pause */}
         <div
-          className="relative flex-1 min-h-[280px] max-h-[min(52vh,460px)] bg-black overflow-hidden"
+          className={styles.mediaViewport}
           onMouseDown={() => setIsPaused(true)}
           onMouseUp={() => setIsPaused(false)}
           onMouseLeave={() => setIsPaused(false)}
