@@ -25,7 +25,7 @@ export const getNotifications = asyncHandler(async (req, res) => {
   const { limit = 30, importance } = req.query;
 
   const filter = { recipient: userId };
-  if (importance && ['priority', 'activity'].includes(importance)) {
+  if (importance && ['priority', 'informative', 'activity'].includes(importance)) {
     filter.importance = importance;
   }
 

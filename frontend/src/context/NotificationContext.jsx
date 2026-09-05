@@ -29,6 +29,15 @@ export const NotificationProvider = ({ children }) => {
   const [pushSupported, setPushSupported] = useState(false);
   const [pushPermission, setPushPermission] = useState('default');
   const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [activeInformative, setActiveInformative] = useState(null);
+
+  const openInformativeModal = useCallback((notification) => {
+    setActiveInformative(notification);
+  }, []);
+
+  const closeInformativeModal = useCallback(() => {
+    setActiveInformative(null);
+  }, []);
 
   // Check Web Push browser support & permission on mount
   useEffect(() => {
@@ -71,7 +80,7 @@ export const NotificationProvider = ({ children }) => {
     setLoading(true);
     try {
       const data = await notificationApiService.getNotifications(params);
-      setNotifications(data);
+      setNotifications(Array.isArray(data) ? data : []);
       await fetchUnreadCount();
     } catch (error) {
       console.error('[NotificationContext] fetchNotifications error:', error.message);
@@ -80,13 +89,21 @@ export const NotificationProvider = ({ children }) => {
     }
   }, [isAuthenticated, fetchUnreadCount]);
 
-  // Initial load and periodic unread count polling (every 60s when authenticated)
+  // Initial load and periodic unread count & notifications polling (every 30s when authenticated)
   useEffect(() => {
     if (isAuthenticated) {
       fetchNotifications();
-      const interval = setInterval(fetchUnreadCount, 60000);
+      fetchUnreadCount();
 
-      const handleFocus = () => fetchUnreadCount();
+      const interval = setInterval(() => {
+        fetchUnreadCount();
+        fetchNotifications();
+      }, 30000);
+
+      const handleFocus = () => {
+        fetchUnreadCount();
+        fetchNotifications();
+      };
       window.addEventListener('focus', handleFocus);
 
       return () => {
@@ -243,6 +260,9 @@ export const NotificationProvider = ({ children }) => {
         pushSupported,
         pushPermission,
         pushSubscribed,
+        activeInformative,
+        openInformativeModal,
+        closeInformativeModal,
         fetchNotifications,
         fetchUnreadCount,
         markAsRead,

@@ -15,6 +15,7 @@ class NotificationService {
     message,
     entityType = null,
     entityId = null,
+    details = null,
     sendPush = false,
     url = '/',
   }) {
@@ -29,7 +30,7 @@ class NotificationService {
       }
 
       // 1. Create In-App Notification in MongoDB
-      const notification = await Notification.create({
+      const notificationData = {
         recipient,
         actor,
         type,
@@ -39,26 +40,38 @@ class NotificationService {
         entityType,
         entityId,
         isRead: false,
-      });
+      };
+
+      if (details) {
+        notificationData.details = details;
+      }
+
+      const notification = await Notification.create(notificationData);
 
       const populatedNotification = await Notification.findById(notification._id)
         .populate('actor', 'name avatar')
         .lean();
 
-      // 2. Dispatch Web Push if sendPush is true or if notification is priority
-      const shouldPush = sendPush || importance === 'priority';
+      // 2. Dispatch Web Push if sendPush is true or if notification is priority or informative
+      const shouldPush = sendPush || importance === 'priority' || importance === 'informative';
       if (shouldPush) {
+        const resolvedUrl = url === '/' && importance === 'informative'
+          ? `/?notificationId=${notification._id}`
+          : url;
+
         const pushPayload = {
           title,
           body: message,
           icon: '/usly-logo.png',
           badge: '/usly-logo.png',
-          url,
+          url: resolvedUrl,
           data: {
             notificationId: notification._id,
+            importance,
+            type,
             entityType,
             entityId,
-            url,
+            url: resolvedUrl,
           },
         };
 
@@ -296,6 +309,73 @@ class NotificationService {
     } catch (error) {
       console.error('[NotificationService] notifyMomentComment error:', error.message);
     }
+  }
+
+  /**
+   * Informative: Usly Product & Feature Updates (In-App: YES, Push: YES, Email: NO)
+   * Sends an informative update to both users (or specified recipients).
+   */
+  async createInformativeNotification({
+    title,
+    message,
+    details = null,
+    recipients = null,
+  }) {
+    try {
+      if (!title || !message) {
+        throw new Error('Title and message are required for informative notifications');
+      }
+
+      // Resolve target recipients
+      let targetRecipientIds = [];
+      if (Array.isArray(recipients) && recipients.length > 0) {
+        targetRecipientIds = recipients.map((r) => (r._id || r).toString());
+      } else if (recipients) {
+        targetRecipientIds = [(recipients._id || recipients).toString()];
+      } else {
+        // Default: send to all active Usly relationship users
+        const users = await User.find({}, '_id').lean();
+        targetRecipientIds = users.map((u) => u._id.toString());
+      }
+
+      if (targetRecipientIds.length === 0) {
+        console.warn('[NotificationService] No recipients found for informative notification.');
+        return [];
+      }
+
+      const createdNotifications = [];
+      for (const recipientId of targetRecipientIds) {
+        const notification = await this.createNotification({
+          recipient: recipientId,
+          actor: null,
+          type: 'USLY_UPDATE',
+          importance: 'informative',
+          title,
+          message,
+          entityType: null,
+          entityId: null,
+          details,
+          sendPush: true,
+          url: '/',
+        });
+
+        if (notification) {
+          createdNotifications.push(notification);
+        }
+      }
+
+      return createdNotifications;
+    } catch (error) {
+      console.error('[NotificationService] createInformativeNotification error:', error.message);
+      return [];
+    }
+  }
+
+  /**
+   * Alias for createInformativeNotification
+   */
+  async createUslyUpdateNotification(params) {
+    return this.createInformativeNotification(params);
   }
 }
 

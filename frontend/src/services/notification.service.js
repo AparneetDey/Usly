@@ -6,7 +6,9 @@ class NotificationApiService {
    */
   async getNotifications(params = {}) {
     const response = await api.get('/notifications', { params });
-    return response.data || [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response?.data)) return response.data;
+    return [];
   }
 
   /**
@@ -14,7 +16,9 @@ class NotificationApiService {
    */
   async getUnreadCount() {
     const response = await api.get('/notifications/unread-count');
-    return response.data?.unreadCount || 0;
+    if (typeof response?.unreadCount === 'number') return response.unreadCount;
+    if (typeof response?.data?.unreadCount === 'number') return response.data.unreadCount;
+    return 0;
   }
 
   /**

@@ -9,9 +9,10 @@ export const NOTIFICATION_TYPES = [
   'MOMENT_REACTION',
   'MOMENT_COMMENT',
   'CHAT_MESSAGE',
+  'USLY_UPDATE',
 ];
 
-export const NOTIFICATION_IMPORTANCE = ['priority', 'activity'];
+export const NOTIFICATION_IMPORTANCE = ['priority', 'informative', 'activity'];
 
 const notificationSchema = new mongoose.Schema(
   {
@@ -70,6 +71,29 @@ const notificationSchema = new mongoose.Schema(
     readAt: {
       type: Date,
       default: null,
+    },
+    details: {
+      heading: {
+        type: String,
+        default: null,
+        trim: true,
+      },
+      content: {
+        type: String,
+        default: null,
+        trim: true,
+      },
+      changes: [
+        {
+          type: String,
+          trim: true,
+        },
+      ],
+      imageUrl: {
+        type: String,
+        default: null,
+        trim: true,
+      },
     },
   },
   {
