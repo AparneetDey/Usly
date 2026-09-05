@@ -158,7 +158,7 @@ export const updateComplaint = asyncHandler(async (req, res) => {
   });
 
   const updatedComplaint = await Complaint.findByIdAndUpdate(id, updates, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   })
     .populate('createdBy', 'name email avatar')

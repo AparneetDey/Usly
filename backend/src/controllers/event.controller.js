@@ -159,7 +159,7 @@ export const updateEvent = asyncHandler(async (req, res) => {
   });
 
   const updatedEvent = await Event.findByIdAndUpdate(id, updates, {
-    new: true,
+    returnDocument: 'after',
     runValidators: true,
   }).populate('createdBy', 'name email avatar');
 
