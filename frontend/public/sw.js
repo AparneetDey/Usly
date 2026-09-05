@@ -17,7 +17,10 @@ self.addEventListener('push', (event) => {
   try {
     const data = event.data.json();
 
-    const title = data.title || 'Usly 💜';
+    const rawTitle = (data.title || 'New update').trim();
+    const title = rawTitle.toLowerCase().startsWith('usly')
+      ? rawTitle
+      : `Usly • ${rawTitle}`;
     const options = {
       body: data.body || 'You have a new update in Usly.',
       icon: data.icon || '/usly-logo.png',

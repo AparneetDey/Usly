@@ -62,8 +62,12 @@ class NotificationService {
           ? `/?notificationId=${notification._id}`
           : url;
 
+        const pushTitle = title.trim().toLowerCase().startsWith('usly')
+          ? title.trim()
+          : `Usly • ${title.trim()}`;
+
         const pushPayload = {
-          title,
+          title: pushTitle,
           body: message,
           icon: '/usly-logo.png',
           badge: '/usly-logo.png',
