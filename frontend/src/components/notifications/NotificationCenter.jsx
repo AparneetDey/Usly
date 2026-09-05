@@ -48,7 +48,11 @@ const NotificationCenter = ({ isOpen, onClose, bellButtonRef }) => {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside, { passive: true });
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, [isOpen, onClose, bellButtonRef]);
 
   if (!isOpen) return null;
@@ -106,7 +110,13 @@ const NotificationCenter = ({ isOpen, onClose, bellButtonRef }) => {
   };
 
   return (
-    <div className={styles.notificationDropdown} ref={dropdownRef}>
+    <>
+      <div
+        className={styles.mobileBackdrop}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className={styles.notificationDropdown} ref={dropdownRef}>
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.titleGroup}>
@@ -246,6 +256,7 @@ const NotificationCenter = ({ isOpen, onClose, bellButtonRef }) => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

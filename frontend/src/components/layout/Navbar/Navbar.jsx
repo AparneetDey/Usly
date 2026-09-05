@@ -89,7 +89,10 @@ const Navbar = () => {
           <div className="relative">
             <button
               ref={bellButtonRef}
-              onClick={() => setNotificationsOpen((prev) => !prev)}
+              onClick={() => {
+                setMobileOpen(false);
+                setNotificationsOpen((prev) => !prev);
+              }}
               className="p-2 text-muted hover:text-primary transition-colors relative rounded-full hover:bg-surface-alt flex items-center justify-center"
               title="Notifications"
               aria-label="Notifications"
@@ -129,7 +132,10 @@ const Navbar = () => {
 
           <button
             className={`${styles.mobileMenuBtn} ${mobileOpen ? styles.mobileMenuBtnActive : ''}`}
-            onClick={() => setMobileOpen(!mobileOpen)}
+            onClick={() => {
+              setNotificationsOpen(false);
+              setMobileOpen((prev) => !prev);
+            }}
             aria-label="Toggle navigation menu"
           >
             {mobileOpen ? <CloseIcon size={22} /> : <MenuIcon size={22} />}
