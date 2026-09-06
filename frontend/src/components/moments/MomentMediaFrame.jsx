@@ -14,6 +14,11 @@ const MomentMediaFrame = ({
   autoPlay = false,
   onVideoTimeUpdate,
   onVideoEnded,
+  onVideoCanPlay,
+  onVideoLoadedData,
+  onVideoWaiting,
+  onVideoPlaying,
+  onVideoError,
   isDragging = false,
   children,
   className = '',
@@ -40,10 +45,18 @@ const MomentMediaFrame = ({
             ref={videoRef}
             src={media.url}
             controls={controls}
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
             playsInline
             autoPlay={autoPlay}
+            preload="auto"
             onTimeUpdate={onVideoTimeUpdate}
             onEnded={onVideoEnded}
+            onCanPlay={onVideoCanPlay}
+            onLoadedData={onVideoLoadedData}
+            onWaiting={onVideoWaiting}
+            onPlaying={onVideoPlaying}
+            onError={onVideoError}
             className={styles.momentMedia}
             style={mediaTransformStyle}
           />
