@@ -412,7 +412,7 @@ const MomentViewerModal = ({
           {/* Render shared MomentMediaFrame with direction transition animation */}
           <div
             key={`${currentMoment._id}`}
-            className={`w-full h-full ${direction === 'next' ? styles.slideNext : direction === 'prev' ? styles.slidePrev : ''}`}
+            className={`w-full h-full flex items-center justify-center ${direction === 'next' ? styles.slideNext : direction === 'prev' ? styles.slidePrev : ''}`}
           >
             <MomentMediaFrame
               media={currentMoment.media}
