@@ -2,13 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   CameraIcon,
   VideoIcon,
-  SwitchCameraIcon,
+  CameraSwitchIcon,
   RotateCcwIcon,
   CheckIcon,
   CloseIcon,
   WarningIcon,
 } from '../icons/index.js';
 import Button from '../ui/Button/Button.jsx';
+import useCamera from '../../hooks/useCamera.js';
 import styles from './Moments.module.css';
 
 const MAX_RECORDING_SECONDS = 30;
@@ -19,36 +20,28 @@ const MAX_RECORDING_SECONDS = 30;
  * using native getUserMedia and MediaRecorder APIs.
  */
 const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const {
+    videoRef,
+    streamRef,
+    facingMode,
+    permissionState,
+    errorMessage,
+    isSwitching,
+    startCamera,
+    stopCamera,
+    switchCamera,
+  } = useCamera({ mode });
+
   const mediaRecorderRef = useRef(null);
   const recordedChunksRef = useRef([]);
   const timerRef = useRef(null);
   const startTimeRef = useRef(0);
 
-  const [permissionState, setPermissionState] = useState('idle'); // 'idle' | 'granted' | 'denied' | 'error'
-  const [errorMessage, setErrorMessage] = useState('');
-  const [cameras, setCameras] = useState([]);
-  const [selectedCameraIndex, setSelectedCameraIndex] = useState(0);
-
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [reviewMedia, setReviewMedia] = useState(null); // { url, file, type, duration }
 
-  // Clean up stream tracks completely when leaving or closing
-  const stopStream = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => {
-        track.stop();
-      });
-      streamRef.current = null;
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  // Stop MediaRecorder and timers
+  // Stop MediaRecorder and timers safely
   const stopRecordingEngine = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -64,98 +57,17 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
     setIsRecording(false);
   }, []);
 
-  // Enumerate available video devices
-  const updateAvailableCameras = useCallback(async () => {
-    try {
-      if (navigator.mediaDevices?.enumerateDevices) {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-        setCameras(videoDevices);
-      }
-    } catch (err) {
-      // ignore
-    }
-  }, []);
-
-  // Initialize camera stream when mode or camera changes (ONLY when camera UI is active)
+  // Initialize camera stream when mode or review status changes
   useEffect(() => {
     if (reviewMedia) return;
 
-    let isSubscribed = true;
-
-    const startCamera = async () => {
-      stopStream();
-      setPermissionState('idle');
-      setErrorMessage('');
-
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setPermissionState('error');
-        setErrorMessage('Camera access is not supported in this browser environment.');
-        return;
-      }
-
-      try {
-        const isVideoMode = mode === 'video';
-        const selectedDevice = cameras[selectedCameraIndex];
-
-        const constraints = {
-          video: selectedDevice?.deviceId
-            ? { deviceId: { exact: selectedDevice.deviceId } }
-            : { facingMode: 'user' },
-          audio: isVideoMode, // Request mic ONLY for video recording
-        };
-
-        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-        if (!isSubscribed) {
-          mediaStream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-
-        streamRef.current = mediaStream;
-        setPermissionState('granted');
-
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          videoRef.current.play().catch(() => {});
-        }
-
-        await updateAvailableCameras();
-      } catch (err) {
-        if (!isSubscribed) return;
-
-        console.error('[CameraCapture] getUserMedia error:', err);
-        setPermissionState('denied');
-
-        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          setErrorMessage(
-            mode === 'video'
-              ? 'Camera and microphone access are required to record a video.'
-              : 'Camera access is required to take a photo.'
-          );
-        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
-          setErrorMessage('No camera or microphone device was found.');
-        } else {
-          setErrorMessage(err.message || 'Failed to access camera device.');
-        }
-      }
-    };
-
-    startCamera();
+    startCamera(facingMode);
 
     return () => {
-      isSubscribed = false;
       stopRecordingEngine();
-      stopStream();
+      stopCamera();
     };
-  }, [mode, selectedCameraIndex, reviewMedia, stopStream, stopRecordingEngine, updateAvailableCameras]);
-
-  // Switch camera toggle
-  const handleSwitchCamera = () => {
-    if (cameras.length > 1) {
-      setSelectedCameraIndex((prev) => (prev + 1) % cameras.length);
-    }
-  };
+  }, [mode, reviewMedia, startCamera, stopCamera, stopRecordingEngine]);
 
   // Photo Capture Handler
   const handleTakePhoto = () => {
@@ -178,7 +90,7 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
         const file = new File([blob], `photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
         const objectUrl = URL.createObjectURL(file);
 
-        stopStream();
+        stopCamera();
         setReviewMedia({
           url: objectUrl,
           file,
@@ -212,7 +124,7 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
       const file = new File([blob], `recorded_video_${Date.now()}.webm`, { type: mimeType });
       const objectUrl = URL.createObjectURL(file);
 
-      stopStream();
+      stopCamera();
       setReviewMedia({
         url: objectUrl,
         file,
@@ -220,7 +132,7 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
         duration: actualDuration,
       });
     };
-  }, [stopRecordingEngine, stopStream]);
+  }, [stopRecordingEngine, stopCamera]);
 
   // Start Video Recording with 30s Hard Limit
   const handleStartVideoRecording = () => {
@@ -295,7 +207,7 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
   // Cancel and clean up camera tracks completely
   const handleCancelClick = () => {
     stopRecordingEngine();
-    stopStream();
+    stopCamera();
     if (reviewMedia?.url) {
       URL.revokeObjectURL(reviewMedia.url);
     }
@@ -356,14 +268,14 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Live Camera Viewfinder */}
+      {/* Live Camera Viewfinder with conditional selfie horizontal mirror */}
       <div className={styles.cameraFrame}>
         <video
           ref={videoRef}
           autoPlay
           playsInline
           muted
-          className="w-full h-full object-cover"
+          className={`w-full h-full object-cover ${facingMode === 'user' ? styles.mirrorVideo : ''}`}
         />
 
         {/* Recording Status & Timer Overlay */}
@@ -374,26 +286,34 @@ const CameraCapture = ({ mode = 'photo', onCapture, onCancel }) => {
           </div>
         )}
 
-        {/* Top Action Overlay (Switch Camera & Close) */}
-        <div className="absolute top-3 right-3 flex items-center gap-2 z-10">
-          {cameras.length > 1 && !isRecording && (
-            <button
-              type="button"
-              onClick={handleSwitchCamera}
-              className="p-2 bg-black/60 text-white rounded-full hover:bg-black transition-colors"
-              title="Switch Camera"
-            >
-              <SwitchCameraIcon size={18} />
-            </button>
-          )}
-
+        {/* Top Right Action Overlay (Cancel / Close) */}
+        <div className="absolute top-3 right-3 z-10">
           <button
             type="button"
             onClick={handleCancelClick}
-            className="p-2 bg-black/60 text-white rounded-full hover:bg-black transition-colors"
+            className={styles.cameraActionBtn}
             title="Cancel"
           >
             <CloseIcon size={18} />
+          </button>
+        </div>
+
+        {/* Bottom Right Action Overlay (Switch Camera) */}
+        <div className="absolute bottom-3 right-3 z-10">
+          <button
+            type="button"
+            onClick={switchCamera}
+            disabled={isSwitching || isRecording}
+            className={`${styles.cameraActionBtn} ${isSwitching ? 'cursor-wait opacity-60' : ''}`}
+            title={
+              isRecording
+                ? 'Cannot switch camera while recording'
+                : isSwitching
+                ? 'Switching camera...'
+                : `Switch to ${facingMode === 'user' ? 'back' : 'front'} camera`
+            }
+          >
+            <CameraSwitchIcon size={20} className={isSwitching ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>

@@ -362,6 +362,50 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
 }
 
+/* Mirror selfie camera viewfinder for natural mirror-like preview */
+.mirrorVideo {
+  transform: scaleX(-1);
+}
+
+/* Circular Viewfinder Action Buttons (guaranteed 1:1 circle, immune to squishing) */
+.cameraActionBtn {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.cameraActionBtn:hover:not(:disabled) {
+  background-color: rgba(0, 0, 0, 0.85);
+  transform: scale(1.06);
+}
+
+.cameraActionBtn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.cameraActionBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .recordingTimerBadge {
   position: absolute;
   top: 0.85rem;
