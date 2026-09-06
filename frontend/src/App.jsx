@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { NotificationProvider } from './context/NotificationContext.jsx';
+import { PresenceProvider } from './context/PresenceContext.jsx';
 import ProtectedRoute from './routes/ProtectedRoute.jsx';
 
 import Login from './pages/Login/Login.jsx';
@@ -16,7 +17,8 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <Router>
+        <PresenceProvider>
+          <Router>
           <Routes>
             {/* Public Login Route (No Registration Route) */}
             <Route path="/login" element={<Login />} />
@@ -35,6 +37,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
+        </PresenceProvider>
       </NotificationProvider>
     </AuthProvider>
   );

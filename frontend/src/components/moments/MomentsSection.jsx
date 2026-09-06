@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { PlusIcon, HeartIcon } from '../icons/index.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import useMoments from '../../hooks/useMoments.js';
@@ -22,26 +22,29 @@ const MomentsSection = () => {
 
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const [isViewerOpen, setIsViewerOpen] = useState(false);
+  const [activeCreatorId, setActiveCreatorId] = useState(null);
   const [initialIndex, setInitialIndex] = useState(0);
 
-  const userMoments = moments.filter((m) => (m.createdBy?._id || m.createdBy) === user?._id);
-  const partnerMoments = moments.filter((m) => (m.createdBy?._id || m.createdBy) === partner?._id);
+  // Normalize creator ID comparisons for MongoDB ObjectIds and populated objects
+  const getCreatorId = (m) => String(m?.createdBy?._id || m?.createdBy || '');
+  const currentUserIdStr = String(user?._id || user?.id || '');
+  const partnerIdStr = String(partner?._id || partner?.id || '');
 
-  // Chronologically sort all active moments (oldest active first for story playback queue)
-  const chronologicalActiveMoments = [...moments].sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const userMoments = moments.filter((m) => getCreatorId(m) === currentUserIdStr);
+  const partnerMoments = moments.filter((m) => getCreatorId(m) === partnerIdStr);
+
+  // Scoped sequence for the viewer: strictly contains only the selected creator's active moments, sorted chronologically
+  const viewerMomentsList = useMemo(() => {
+    if (!activeCreatorId) return [];
+    return moments
+      .filter((m) => getCreatorId(m) === String(activeCreatorId))
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  }, [moments, activeCreatorId]);
 
   const handleOpenUserMoments = () => {
     if (userMoments.length > 0) {
-      // Find the oldest active moment for the user to start playback from
-      const userMomentsOldestFirst = [...userMoments].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-      const targetId = userMomentsOldestFirst[0]?._id;
-      const idx = chronologicalActiveMoments.findIndex((m) => m._id === targetId);
-
-      setInitialIndex(idx >= 0 ? idx : 0);
+      setActiveCreatorId(currentUserIdStr);
+      setInitialIndex(0);
       setIsViewerOpen(true);
     } else {
       setIsCreatorOpen(true);
@@ -50,16 +53,16 @@ const MomentsSection = () => {
 
   const handleOpenPartnerMoments = () => {
     if (partnerMoments.length > 0) {
-      // Find the oldest active moment for the partner to start playback from
-      const partnerMomentsOldestFirst = [...partnerMoments].sort(
-        (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-      );
-      const targetId = partnerMomentsOldestFirst[0]?._id;
-      const idx = chronologicalActiveMoments.findIndex((m) => m._id === targetId);
-
-      setInitialIndex(idx >= 0 ? idx : 0);
+      setActiveCreatorId(partnerIdStr);
+      setInitialIndex(0);
       setIsViewerOpen(true);
     }
+  };
+
+  const handleCloseViewer = () => {
+    setIsViewerOpen(false);
+    setActiveCreatorId(null);
+    setInitialIndex(0);
   };
 
   const getInitials = (name) => {
@@ -155,8 +158,8 @@ const MomentsSection = () => {
       {/* Multi-Moment Viewer Modal */}
       <MomentViewerModal
         isOpen={isViewerOpen}
-        onClose={() => setIsViewerOpen(false)}
-        momentsList={chronologicalActiveMoments}
+        onClose={handleCloseViewer}
+        momentsList={viewerMomentsList}
         initialIndex={initialIndex}
         currentUserId={user?._id}
         onDelete={async (id) => {

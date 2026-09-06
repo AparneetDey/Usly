@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   CloseIcon,
   TrashIcon,
@@ -27,7 +27,14 @@ const MomentViewerModal = ({
   onAddComment,
   onDeleteComment,
 }) => {
-  const activeMoments = Array.isArray(momentsList) ? momentsList : [];
+  // Ensure the viewer sequence strictly contains only moments from the target creator
+  const activeMoments = useMemo(() => {
+    if (!Array.isArray(momentsList) || momentsList.length === 0) return [];
+    const getCreatorId = (m) => String(m?.createdBy?._id || m?.createdBy || '');
+    const targetCreatorId = getCreatorId(momentsList[initialIndex] || momentsList[0]);
+    if (!targetCreatorId) return momentsList;
+    return momentsList.filter((m) => getCreatorId(m) === targetCreatorId);
+  }, [momentsList, initialIndex]);
 
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);

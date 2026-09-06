@@ -33,7 +33,7 @@ export { default as MessageCircleIcon } from './MessageCircleIcon.jsx';
 export { default as ArrowRightIcon } from './ArrowRightIcon.jsx';
 export { default as CameraIcon } from './CameraIcon.jsx';
 export { default as VideoIcon } from './VideoIcon.jsx';
-export { default as SwitchCameraIcon } from './SwitchCameraIcon.jsx';
+export { default as SwitchCameraIcon, CameraSwitchIcon } from './SwitchCameraIcon.jsx';
 export { default as RotateCcwIcon } from './RotateCcwIcon.jsx';
 export { default as BellIcon } from './BellIcon.jsx';
 export { default as SparklesIcon } from './SparklesIcon.jsx';
