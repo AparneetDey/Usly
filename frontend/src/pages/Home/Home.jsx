@@ -19,6 +19,7 @@ import Badge from '../../components/ui/Badge/Badge.jsx';
 import { SummaryCardSkeleton } from '../../components/ui/Skeleton/index.js';
 import MomentsSection from '../../components/moments/MomentsSection.jsx';
 import MissYouSection from '../../components/home/MissYouSection/MissYouSection.jsx';
+import PartnerPresence from '../../components/presence/PartnerPresence.jsx';
 import eventService from '../../services/event.service.js';
 import letterService from '../../services/letter.service.js';
 import complaintService from '../../services/complaint.service.js';
@@ -96,13 +97,23 @@ const Home = () => {
   return (
     <PageContainer>
       <div className={styles.headerSection}>
-        <h1 className={styles.greeting}>
-          <span>{greeting}, {user?.name || 'Love'}</span>
-          <GreetingIconComp size={24} className="text-accent ml-2 inline-block" />
-        </h1>
-        <p className={styles.subgreeting}>
-          {partner ? `Sharing moments with ${partner.name}` : '"Another day of us."'}
-        </p>
+        <div className={styles.headerRow}>
+          <div>
+            <h1 className={styles.greeting}>
+              <span>{greeting}, {user?.name || 'Love'}</span>
+              <GreetingIconComp size={24} className="text-accent ml-2 inline-block" />
+            </h1>
+            <p className={styles.subgreeting}>
+              {partner ? `Sharing moments with ${partner.name}` : '"Another day of us."'}
+            </p>
+          </div>
+
+          {partner && (
+            <div className={styles.partnerPresenceBox}>
+              <PartnerPresence partner={partner} showAvatar={true} showName={true} />
+            </div>
+          )}
+        </div>
       </div>
 
       <div className={styles.togetherBanner}>
