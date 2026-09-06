@@ -13,13 +13,13 @@ export const formatLastSeen = (dateInput) => {
 
   // If in the future or under 1 minute
   if (diffMs < 60 * 1000) {
-    return "Last seen just now";
+    return "Last online just now";
   }
 
   // Under 60 minutes
   if (diffMs < 60 * 60 * 1000) {
     const mins = Math.floor(diffMs / (60 * 1000));
-    return mins <= 1 ? "Last seen 1 minute ago" : `Last seen ${mins} minutes ago`;
+    return mins <= 1 ? "Last online 1 minute ago" : `Last online ${mins} minutes ago`;
   }
 
   // Format local time (e.g., "8:42 PM")
@@ -36,7 +36,7 @@ export const formatLastSeen = (dateInput) => {
 
   // Today
   if (isSameDay(date, now)) {
-    return `Last seen today at ${timeStr}`;
+    return `Last online today at ${timeStr}`;
   }
 
   // Yesterday

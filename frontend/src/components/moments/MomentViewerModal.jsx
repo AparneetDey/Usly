@@ -40,6 +40,7 @@ const MomentViewerModal = ({
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isCommentFocused, setIsCommentFocused] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   const [commentMessage, setCommentMessage] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
@@ -72,11 +73,37 @@ const MomentViewerModal = ({
 
   const currentMoment = activeMoments[currentIndex] || null;
 
-  // Reset progress when current moment changes
+  // Reset progress & initialize video loading state when current moment changes
   useEffect(() => {
     if (!currentMoment) return;
     setProgress(0);
-  }, [currentMoment?._id]);
+    if (currentMoment.media?.type === 'video') {
+      setIsVideoLoading(true);
+    } else {
+      setIsVideoLoading(false);
+    }
+  }, [currentMoment?._id, currentMoment?.media?.type]);
+
+  // Video readiness & loading callbacks
+  const handleVideoCanPlay = useCallback(() => {
+    setIsVideoLoading(false);
+  }, []);
+
+  const handleVideoLoadedData = useCallback(() => {
+    setIsVideoLoading(false);
+  }, []);
+
+  const handleVideoPlaying = useCallback(() => {
+    setIsVideoLoading(false);
+  }, []);
+
+  const handleVideoWaiting = useCallback(() => {
+    setIsVideoLoading(true);
+  }, []);
+
+  const handleVideoError = useCallback(() => {
+    setIsVideoLoading(false);
+  }, []);
 
   // Next moment / auto-advance handler
   const handleNext = useCallback(() => {
@@ -137,12 +164,22 @@ const MomentViewerModal = ({
     if (isPaused || isCommentFocused) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play().catch(() => {});
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsVideoLoading(false);
+          })
+          .catch(() => {
+            // Video is loading/buffering or waiting for user interaction
+          });
+      }
     }
   }, [isOpen, currentMoment?._id, currentMoment?.media?.type, isPaused, isCommentFocused]);
 
-  // Video Time Update & Ended Handlers
+  // Video Time Update & Ended Handlers (auto-advance only advances when video is actually playing)
   const handleVideoTimeUpdate = () => {
+    if (isVideoLoading) return;
     if (videoRef.current && videoRef.current.duration) {
       const currentPct = (videoRef.current.currentTime / videoRef.current.duration) * 100;
       setProgress(currentPct);
@@ -150,6 +187,7 @@ const MomentViewerModal = ({
   };
 
   const handleVideoEnded = () => {
+    if (isVideoLoading) return;
     handleNext();
   };
 
@@ -188,6 +226,14 @@ const MomentViewerModal = ({
     if (diffMins < 60) return `${diffMins}m ago`;
     const diffHours = Math.floor(diffMins / 60);
     return `${diffHours}h ago`;
+  };
+
+  // Format creation time: time only, 12-hour format with AM/PM (e.g. "3:45 PM")
+  const formatExactTime = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
   const formatExpiresIn = (expiresStr) => {
@@ -235,7 +281,9 @@ const MomentViewerModal = ({
             if (idx < currentIndex) {
               widthPct = 100;
             } else if (idx === currentIndex) {
-              widthPct = Math.min(100, Math.max(0, progress));
+              widthPct = (isVideoLoading && currentMoment.media?.type === 'video')
+                ? 0
+                : Math.min(100, Math.max(0, progress));
             } else {
               widthPct = 0;
             }
@@ -280,7 +328,13 @@ const MomentViewerModal = ({
                 )}
               </div>
               <span className={styles.momentTime}>
-                {formatRelativeTime(currentMoment.createdAt)}
+                <span>{formatRelativeTime(currentMoment.createdAt)}</span>
+                {currentMoment.createdAt && (
+                  <>
+                    <span className="opacity-40 mx-1">•</span>
+                    <span>{formatExactTime(currentMoment.createdAt)}</span>
+                  </>
+                )}
               </span>
             </div>
           </div>
@@ -314,6 +368,19 @@ const MomentViewerModal = ({
           onTouchStart={() => setIsPaused(true)}
           onTouchEnd={() => setIsPaused(false)}
         >
+          {/* Video Loading Skeleton Overlay */}
+          {isVideoLoading && currentMoment.media?.type === 'video' && (
+            <div className={styles.videoSkeleton}>
+              <div className={styles.videoSkeletonShimmer} />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 z-10 select-none pointer-events-none">
+                <div className="w-9 h-9 rounded-full border-3 border-primary/30 border-t-primary animate-spin" />
+                <span className="text-[11px] font-semibold text-white/90 tracking-wide bg-black/50 px-3 py-1 rounded-full backdrop-blur-sm shadow-sm">
+                  Loading video...
+                </span>
+              </div>
+            </div>
+          )}
+
           {/* Previous Moment Overlay Button */}
           {currentIndex > 0 && (
             <button
@@ -351,10 +418,15 @@ const MomentViewerModal = ({
               media={currentMoment.media}
               alt={currentMoment.caption || 'Moment'}
               videoRef={videoRef}
-              controls
+              controls={false}
               autoPlay={false}
               onVideoTimeUpdate={handleVideoTimeUpdate}
               onVideoEnded={handleVideoEnded}
+              onVideoCanPlay={handleVideoCanPlay}
+              onVideoLoadedData={handleVideoLoadedData}
+              onVideoWaiting={handleVideoWaiting}
+              onVideoPlaying={handleVideoPlaying}
+              onVideoError={handleVideoError}
             />
           </div>
         </div>
